@@ -34,7 +34,7 @@
 #' # Another example
 #' param <- find_param(kappa = 0.1, gamma = 0, intercept = FALSE)
 #' # Asymptotic standard deviation
-#' param[2] / sqrt(0.1)
+#' param[3] / sqrt(0.1)
 find_param <- function(rho_prime = rho_prime_logistic,
                        f_prime1 = f_prime1_logistic,
                        f_prime0 = f_prime0_logistic,
@@ -58,7 +58,7 @@ find_param <- function(rho_prime = rho_prime_logistic,
   f_eq <- equation_binary(rho_prime, f_prime1, f_prime0,
                           kappa, gamma, beta0, intercept)
   if(verbose) {
-    cat("Solve parameters for: kappa = ", kappa, ", gamma = ", gamma, ", beta0 = ", beta0)
+    cat("Solve parameters for: kappa = ", kappa, ", gamma = ", gamma, ", beta0 = ", beta0, "\n")
     if(intercept == TRUE) cat(", with intercept. \n")
   }
   sol <- fsolve(f_eq, x_init, J = NULL, maxiter = 100, tol = 1e-4, verbose)
