@@ -1,0 +1,208 @@
+---
+title: "glmhd: statistical inference in high-dimensional binary regression"
+author: "Qian Zhao"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE, 
+  warning = FALSE, 
+  fig.align = "center", 
+  fig.width = 5,
+  fig.height = 4
+)
+```
+
+```{r, include = FALSE}
+library(ggplot2)
+library(purrr)
+```
+
+```{r, include = FALSE}
+par(mar = c(3, 3, 2, 1), mgp = c(1.5, 0.5, 0))
+options(max.print = 20, digits = 3)
+```
+
+In this vignette we will show you how to use functions in the `glmhd` package to estimate the bias and variance of high dimensional logistic MLE (maximum likelihood estimates). ``High dimension'' refers to the setting when the number of observations $n$ and number of variables $p$ are both large. 
+
+As a recurring example, we consider a logistic regression model, and for simplicity, we fix the the first half variables to be null and the second half have fixed coefficients $\beta = 2$. 
+
+```{r}
+# Sample from a logistic model
+#     n, p - number of samples and number of variables
+#     R - cholesky decomposition of the covariance matrix of the variables
+#     adjust - if TRUE, computes the adjusted p-value for H0: beta1 = 0
+sample_logistic <- function(n, p, R, adjust = FALSE){
+  # Generate data matrix
+  X <- matrix(rnorm(n * p, 0, 1), n, p) %*%  R / sqrt(n)
+  # Generate parameters
+  beta <- rep(c(0, 2), p / 2) 
+  # Sample response 
+  Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
+  # Logistic regression 
+  fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
+  if(!adjust){
+    # Returns the p-th fitted coefficient and its standard error estimate
+  c(fit$coef[p], summary(fit)$coef[p, 2])  }else{
+    # Returns the adjusted p-value for the first coordinate
+    adjusted_fit <- adjust_glm(fit, verbose = TRUE, echo = TRUE)
+    summary(adjusted_fit)$coef[1,4]
+  }
+}
+```
+
+We repeat this function $B = 200$ times, and draw a histogram of the MLE of the $p$th coefficient. We pick $n = 1000$ and $p = 200$, and we set the variables to be from multivariate Gaussian from a AR(1) model with $\rho = 0.5$.
+
+```{r}
+n <- 1000; p <- 200
+R <- chol(toeplitz(0.5^(0:(p - 1))))
+beta_hat <- replicate(B <- 200, sample_logistic(n, p, R))
+```
+
+```{r, echo = FALSE}
+# plot fitted coefficients
+hist(beta_hat[1, ], main = expression(paste("Histogram of ",hat(beta)[p])),
+     xlab = "Estimated coefficients")
+abline(v = mean(beta_hat[1, ]), col = "red", lwd = 2)
+abline(v = 2, col = "black", lwd = 2)
+```
+
+As we can see, the estimated $\hat{\beta}$ is not centered at the true value $\beta = 2$ (black line), but at some larger `r mean(beta_hat[1, ])` (red line). Further, the estimated standard error `r mean(beta_hat[2, ])` is smaller than the observed standard deviation `r sd(beta_hat[1, ])` from independent samples. 
+
+The goal of this package is to estimate the bias and standard deviation of the MLE more accurately than the classical theory. The procedure is based on the asymptotic distribution of the MLE when $n, p\to\infty$ at a fixed ratio $p / n\to \kappa \in (0, 1)$. The asymptotic theory is based on the distribution of the MLE when the variables $X$ is from a multivariate Gaussian. Now let's load the library. 
+
+```{r setup}
+library(glmhd)
+devtools::load_all()
+```
+
+We will use the function `adjust_glm` to compute the adjusted MLE and standard error. Let's repeat the previous example and compute the MLE. Note here we specify `x = TRUE` and `y = TRUE` so the original data matrix is returned in `fit`. 
+
+```{r}
+# Same example as before
+X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
+beta <- rep(c(0, 2), p / 2) 
+Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
+fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
+```
+
+Now we call `adjust_glm`. There are three arguments for this function, but you only need to input the first one, the output `glm` object. Below, the second argument and third arguments are set at their default values, `verbose` specifies if progress should be printed, and `echo = TRUE` means that the input `glm` object is also returned in the output. `verbose = TRUE` by default because it helps to identify issues in the code and because it takes a while to run the function. 
+
+```{r}
+adjusted_fit <- adjust_glm(fit, verbose = FALSE, echo = TRUE)
+```
+
+We now show you how to access the estimated bias, and you can also find the adjusted MLE and their standard error for the last variable. You can compare the estimated bias `r adjusted_fit$param["alpha_s"]` with the observed bias `r mean(beta_hat[1, ]) / 2`. 
+
+```{r}
+# Estimated bias 
+adjusted_fit$param["alpha_s"]
+# Adjusted MLE
+adjusted_fit$coef_adj[p]
+# Adjusted std. 
+adjusted_fit$std_adj[p]
+```
+
+You can print out the coefficient tables by calling the function `summary` as usual.
+
+```{r}
+print(summary(adjusted_fit))
+```
+
+#### Hypothesis testing
+
+The `summary` function prints the adjusted MLE $\hat{\beta}$ and std $\hat{\sigma}$, as well as a t-statistics $t = \hat{\beta}/\hat{\sigma}$ and a P-value $\mathrm{P}(|\mathcal{N}(0,1)|\geq |t|)$. If the variables are multivariate Gaussian and the true model is logistic, then this p-value is from a Uniform[0,1] distribution. 
+
+The following is a simulation to examine whether the calculated p-value is approximately uniform. For simplicity, we consider the first variable, which is a null, and the function is also included at the beginning. 
+
+```{r}
+# pval_adj <- replicate(B <- 100, sample_logistic(n, p, R, adjust = TRUE))
+```
+
+You can also use the likelihood ratio test (LRT) by calling the function `lrt_glm`. It requires two arguments, the first is a list of `glm` fits and the second is the `param` output from `adjust_glm`. It prints the likelihood ratio statistics and p-values computed according to the rescaled chi-squared distribution. 
+
+```{r}
+f1 <- fit
+f2 <- glm(Y ~ X[, -p] + 0, family = binomial, x = TRUE, y = TRUE)
+# P-values for the LRT
+lrt <- lrt_glm(list(f1, f2), param = adjusted_fit$param)
+print(lrt)
+```
+
+#### Model with an intercept 
+
+The previous example concerns a logistic model without an intercept, you can use the same function call for a model with an intercept. Here's the same example with an intercept term $\beta_0 = - 0.5$. This section is separated because the theory justification for this algorithm is still under study. 
+
+```{r}
+# Simulation setup
+X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
+beta <- rep(c(0, 2), p / 2) 
+Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta + 0.5)))
+# Fit a logistic regression
+fit <- glm(Y ~ X, family = binomial, x = TRUE, y = TRUE)
+# Estimate the bias and variance of the MLE
+adjusted_fit <- adjust_glm(fit, verbose = FALSE) 
+```
+
+You can find the estimated intercept (not the MLE) as follows. 
+
+```{r}
+adjusted_fit$intercept
+```
+
+You can also find the estimated bias and standard deviation as before. 
+
+```{r}
+# Estimated bias and std.
+adjusted_fit$param["alpha_s"]
+adjusted_fit$param["sigma_s"]
+# Adjusted MLE
+adjusted_fit$coef_adj[p]
+# Adjusted std. 
+adjusted_fit$std_adj[p]
+```
+
+In this example, you can compare the estimated parameters with the true values.
+
+```{r}
+gamma <- sqrt(sum((R %*% beta)^2/n))
+params <- find_param(kappa = p/n, gamma = gamma, beta0 = 0.5, verbose = FALSE)
+params[1] # true bias
+params[2] # true sd
+```
+
+You can compare these estimates from that observed in repeated sampling. 
+
+```{r}
+sample_logistic_intercept <- function(n, p, R){
+  X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
+  beta <- rep(c(0, 2), p / 2) 
+  Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta + 0.5)))
+  fit <- glm(Y ~ X, family = binomial, x = TRUE, y = TRUE)
+  # Returns the p-th fitted coefficient and its standard error
+  c(fit$coef[p+1], summary(fit)$coef[p+1, 2])
+}
+```
+
+```{r}
+beta_hat <- replicate(B, sample_logistic_intercept(n, p, R))
+```
+
+```{r, echo = FALSE}
+# plot fitted coefficients
+hist(beta_hat[1, ], main = expression(paste("Histogram of ",hat(beta)[p])),
+     xlab = "Estimated coefficients")
+abline(v = mean(beta_hat[1, ]), col = "red", lwd = 2)
+abline(v = 2, col = "black", lwd = 2)
+```
+
+The observed bias is `r mean(beta_hat[1, ])/2` and observed standard deviation is `r sd(beta_hat[1, ])`. 
+
