@@ -31,7 +31,7 @@ par(mar = c(3, 3, 2, 1), mgp = c(1.5, 0.5, 0))
 options(max.print = 20, digits = 3)
 ```
 
-In this vignette we will show you how to use functions in the `glmhd` package to estimate the bias and variance of high dimensional logistic MLE (maximum likelihood estimates). ``High dimension'' refers to the setting when the number of observations $n$ and number of variables $p$ are both large. 
+In this vignette we will show you how to use functions in the `glmhd` package to estimate the bias and variance of high dimensional logistic MLE (maximum likelihood estimates). "High dimension" refers to the setting when the number of observations $n$ and number of variables $p$ are both large. 
 
 As a recurring example, we consider a logistic regression model, and for simplicity, we fix the the first half variables to be null and the second half have fixed coefficients $\beta = 2$. 
 
@@ -59,7 +59,7 @@ sample_logistic <- function(n, p, R, adjust = FALSE){
 }
 ```
 
-We repeat this function $B = 200$ times, and draw a histogram of the MLE of the $p$th coefficient. We pick $n = 1000$ and $p = 200$, and we set the variables to be from multivariate Gaussian from a AR(1) model with $\rho = 0.5$.
+We repeat this function $B = 200$ times, and draw a histogram of the MLE of the $p$th coefficient. We pick $n = 1000$ and $p = 200$, and set the variables to be from multivariate Gaussian from a AR(1) model with $\rho = 0.5$.
 
 ```{r}
 n <- 1000; p <- 200
@@ -77,14 +77,14 @@ abline(v = 2, col = "black", lwd = 2)
 
 As we can see, the estimated $\hat{\beta}$ is not centered at the true value $\beta = 2$ (black line), but at some larger `r mean(beta_hat[1, ])` (red line). Further, the estimated standard error `r mean(beta_hat[2, ])` is smaller than the observed standard deviation `r sd(beta_hat[1, ])` from independent samples. 
 
-The goal of this package is to estimate the bias and standard deviation of the MLE more accurately than the classical theory. The procedure is based on the asymptotic distribution of the MLE when $n, p\to\infty$ at a fixed ratio $p / n\to \kappa \in (0, 1)$. The asymptotic theory is based on the distribution of the MLE when the variables $X$ is from a multivariate Gaussian. Now let's load the library. 
+The goal of this package is to estimate the inflation and standard deviation of the MLE more accurately than the classical theory. The procedure is based on the asymptotic distribution of the MLE when $n, p\to\infty$ at a fixed ratio $p / n\to \kappa \in (0, 1)$. Further, the theory requires the variables $X$ to be  multivariate Gaussian. Now let's load the library. 
 
 ```{r setup}
 library(glmhd)
 devtools::load_all()
 ```
 
-We will use the function `adjust_glm` to compute the adjusted MLE and standard error. Let's repeat the previous example and compute the MLE. Note here we specify `x = TRUE` and `y = TRUE` so the original data matrix is returned in `fit`. 
+Let's repeat the previous example and compute the MLE. Note here we specify `x = TRUE` and `y = TRUE` so the original data matrix is returned in `fit`. 
 
 ```{r}
 # Same example as before
@@ -94,13 +94,21 @@ Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
 fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
 ```
 
-Now we call `adjust_glm`. There are three arguments for this function, but you only need to input the first one, the output `glm` object. Below, the second argument and third arguments are set at their default values, `verbose` specifies if progress should be printed, and `echo = TRUE` means that the input `glm` object is also returned in the output. `verbose = TRUE` by default because it helps to identify issues in the code and because it takes a while to run the function. 
+Now we call the function `adjust_glm` to compute the adjusted MLE and standard error.  There are three arguments for this function, but you only need to input the first one, the output `glm` object. Below, the second argument and third arguments are set at their default values, `verbose` specifies if progress should be printed, and `echo = TRUE` means that the input `glm` object is also returned in the output. By default, `verbose = TRUE` because it helps to track progress of the code, and identify issues if the algorithm fails. 
 
 ```{r}
-adjusted_fit <- adjust_glm(fit, verbose = FALSE, echo = TRUE)
+adjusted_fit <- adjust_glm(fit, verbose = TRUE, echo = TRUE)
 ```
 
-We now show you how to access the estimated bias, and you can also find the adjusted MLE and their standard error for the last variable. You can compare the estimated bias `r adjusted_fit$param["alpha_s"]` with the observed bias `r mean(beta_hat[1, ]) / 2`. 
+We now show you how to access the estimated inflation factor, and how to find the adjusted MLE and their standard error for the last variable. You can compare the estimated inflation `r adjusted_fit$param["alpha_s"]` with the observed value `r mean(beta_hat[1, ]) / 2`. As $n, p \to\infty$, the MLE of any coordinate $\beta_j$ satisfies 
+\[
+\frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
+\]
+where $\tau^2_j = \mathrm{Var}(x_j\,|\,x_{-j})$ is the conditional variance of $j$th variable given all the others. `adjusted_fit$param["alpha_s"]` outputs estimated $\alpha_\star$ and `adjusted_fit$param["sigma_s"]` outputs estimated $\sigma_\star$. The function computes an estimated standard error for each $\beta_j$, and the adjusted MLE satisfies
+\[
+\frac{\hat{\beta}_j^\mathrm{Adj} - \beta_j}{\hat{\sigma}_j} \approx \mathcal{N}(0, 1),
+\]
+for $\hat{\sigma}_j = \sigma_\star / \tau_j$ the adjusted std. 
 
 ```{r}
 # Estimated bias 
@@ -111,7 +119,7 @@ adjusted_fit$coef_adj[p]
 adjusted_fit$std_adj[p]
 ```
 
-You can print out the coefficient tables by calling the function `summary` as usual.
+The function `summary` prints the coefficient table. 
 
 ```{r}
 print(summary(adjusted_fit))
