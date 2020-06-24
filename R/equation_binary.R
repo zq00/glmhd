@@ -41,15 +41,19 @@ equation_binary <- function(rho_prime, f_prime1, f_prime0, kappa, gamma, beta0, 
       alpha <-  0; lambda <-  param[1]; sigma <-  param[2];
       if(intercept == 0){
         b <-  0
+        if(verbose) cat("lambda = ", lambda, ", sigma = ", sigma, "\n")
       }else{
         b <- param[3]
+        if(verbose) cat("lambda = ", lambda, ", sigma = ", sigma, ", b = ", b, "\n")
       }
     }else{
       alpha <- param[1]; lambda <-  param[2]; sigma <-  param[3];
       if(intercept == FALSE){
         b <-  0
+        if(verbose) cat("alpha = ", alpha, ", lambda = ", lambda, ", sigma = ", sigma, "\n")
       }else{
         b <- param[4]
+        if(verbose) cat("alpha = ", alpha, ", lambda = ", lambda, ", sigma = ", sigma, ", b = ", b, "\n")
       }
     }
 
