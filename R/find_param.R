@@ -42,7 +42,7 @@ find_param <- function(rho_prime = rho_prime_logistic,
                        gamma,
                        beta0 = 0,
                        intercept = TRUE,
-                       verbose = TRUE){
+                       verbose = FALSE){
   if(gamma == 0){ # case of no signal
     if(intercept == FALSE){
       x_init <- c(2, 2)
@@ -56,11 +56,14 @@ find_param <- function(rho_prime = rho_prime_logistic,
   }
   # Setup system of equations
   f_eq <- equation_binary(rho_prime, f_prime1, f_prime0,
-                          kappa, gamma, beta0, intercept,
-                          verbose)
+                          kappa, gamma, beta0, intercept)
+  if(verbose) {
+    cat("Solve parameters for: kappa = ", kappa, ", gamma = ", gamma, ", beta0 = ", beta0)
+    if(intercept == TRUE) cat(", with intercept. \n")
+  }
+  sol <- fsolve(f_eq, x_init, J = NULL, maxiter = 100, tol = 1e-4, verbose)
+  if(verbose) cat("Solution is", sol$x)
 
-  sol <- fsolve(f_eq, x_init, J = NULL, maxiter = 100, tol = 1e-4,
-                        verbose)
   sol$x
 }
 
