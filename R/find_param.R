@@ -50,9 +50,9 @@ find_param <- function(rho_prime = rho_prime_logistic,
       x_init <- c(2, 2, beta0)
     }
   }else if(intercept == FALSE){
-    x_init <- c(2, 2, gamma)
+    x_init <- c(2, 2, 1 + gamma * 2)
   }else{
-    x_init <- c(2, 2, gamma, beta0)
+    x_init <- c(2, 2, 1 + gamma * 2, beta0)
   }
   # Setup system of equations
   f_eq <- equation_binary(rho_prime, f_prime1, f_prime0,
