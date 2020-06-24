@@ -21,6 +21,7 @@
 #'     Terminate when the search interval is smaller than \code{eps}
 #' @param verbose Print prgress if \code{TRUE}.
 #' @return Numeric. Estimated kappa_hat.
+#' @export
 #' @examples
 #' # Y is independent of X, kappa_s is approximately 0.5
 #' n <- 1000; p <- 200
