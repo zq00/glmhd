@@ -40,11 +40,13 @@
 #'   \item{beta_hat}{Estimated intercept. \code{NULL} if the model does not have an intercept term}
 #' }
 #' @examples
+#' \dontrun{
 #' # no signal case
 #' # should return 0, returns 0.0127
 #' signal <- signal_strength(kappa_hat = 0.5, intercept = FALSE)
 #' signal$gamma_hat
 #' signal$b_hat
+#' }
 signal_strength <- function(rho_prime = rho_prime_logistic,
                             f_prime1 = f_prime1_logistic,
                             f_prime0 = f_prime0_logistic,
@@ -67,7 +69,7 @@ signal_strength <- function(rho_prime = rho_prime_logistic,
   }
   # Search interval
   l <- 0
-  u <- solve_beta(rho_prime, kappa_hat, gamma = 0, verbose = FALSE)
+  u <- solve_beta(rho_prime, kappa_hat, gamma0 = 0, verbose = FALSE)
   if(verbose) cat("Search intercept beta0 in an interval:\n")
   f <- function(beta_hat){
     gamma_hat <- solve_gamma(rho_prime, kappa_hat, beta_hat)
