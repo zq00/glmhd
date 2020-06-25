@@ -26,6 +26,7 @@
 #'     for example the output from the \code{\link[stats]{glm}} function
 #' @param verbose If \code{TRUE}, print progress at every step.
 #' @param echo If \code{TRUE}, return the input \code{glm_output}.
+#' @param ... Additional arguments.
 #' @return A list with elements
 #' \describe{
 #' \item{glm_output}{If \code{echo = TRUE}, returns the input \code{glm_output}.}
@@ -68,6 +69,7 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
   kappa <- p/n
   # Obtain link functions
   link_fun <- process_link(glm_output$family)
+  if(verbose) cat("Link function: ", glm_output$family$link, "\n")
   # Is there an intercept in the model?
   has_intercept <- ifelse(names(glm_output$coef[1]) == "(Intercept)",
                           TRUE, FALSE)
@@ -110,7 +112,7 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
     # Conditional standard deviation
     tau_hat <- 1 / sqrt(diag(solve(t(X[ , -1]) %*% X[ , -1]))) / sqrt(n) / sqrt(1 - kappa)
     # The adjusted mle and standard error
-    coef_adj <-  coefficients(glm_output)[-1] / param["alpha_s"]
+    coef_adj <-  glm_output$coefficients[-1] / param["alpha_s"]
     std_adj <- param["sigma_s"] / sqrt(p) / tau_hat
     return(
       list(
@@ -129,7 +131,7 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
     # Conditional standard deviation
     tau_hat <- 1 / sqrt(diag(solve(t(X) %*% X))) / sqrt(n) / sqrt(1 - kappa)
     # The adjusted mle and standard error
-    coef_adj <- coefficients(glm_output) / param["alpha_s"]
+    coef_adj <- glm_output$coefficients / param["alpha_s"]
     std_adj <- param["sigma_s"] / sqrt(p) / tau_hat
     return(
       list(
