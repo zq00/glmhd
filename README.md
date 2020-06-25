@@ -17,4 +17,4 @@ To get started, please see package vignettes (it usually takes about 20 min to k
 You can read more about the theory of high dimensional logistic MLE here: 
 *The Asymptotic Distribution of the MLE in High-dimensional Logistic Models: Arbitrary Covariance*, by Qian Zhao, Pragya Sur and Emmanuel J. Candès, 	arXiv:2001.09351
 
-If you encounter error or could like to provide feedbacks to use, please use Github - Issues. Thank you! 
+If you encounter error or could like to provide feedbacks to us, please use Github -> Issues. Thank you! 
