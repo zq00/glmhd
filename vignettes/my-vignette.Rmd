@@ -51,9 +51,10 @@ sample_logistic <- function(n, p, R, adjust = FALSE){
   fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
   if(!adjust){
     # Returns the p-th fitted coefficient and its standard error estimate
-  c(fit$coef[p], summary(fit)$coef[p, 2])  }else{
+    c(fit$coef[p], summary(fit)$coef[p, 2])  
+    }else{
     # Returns the adjusted p-value for the first coordinate
-    adjusted_fit <- adjust_glm(fit, verbose = TRUE, echo = TRUE)
+    adjusted_fit <- adjust_glm(fit, verbose = FALSE, echo = TRUE)
     summary(adjusted_fit)$coef[1,4]
   }
 }
@@ -89,7 +90,7 @@ Let's repeat the previous example and compute the MLE. Note here we specify `x =
 ```{r}
 # Same example as before
 X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
-beta <- rep(c(0, 2), p / 2) 
+beta <- rep(c(0, 2), each = p / 2)  
 Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
 fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
 ```
@@ -127,7 +128,7 @@ print(summary(adjusted_fit))
 
 #### Hypothesis testing
 
-The `summary` function prints the adjusted MLE $\hat{\beta}$ and std $\hat{\sigma}$, as well as a t-statistics $t = \hat{\beta}/\hat{\sigma}$ and a P-value $\mathrm{P}(|\mathcal{N}(0,1)|\geq |t|)$. If the variables are multivariate Gaussian and the true model is logistic, then this p-value is from a Uniform[0,1] distribution. 
+The `summary` function prints the adjusted MLE $\hat{\beta}$ and std. $\hat{\sigma}$, as well as a t-statistics $t = \hat{\beta}/\hat{\sigma}$ and a P-value $\mathrm{P}(|\mathcal{N}(0,1)|\geq |t|)$. If the variables are multivariate Gaussian and the true model is logistic, then this p-value is from a Uniform[0,1] distribution. 
 
 The following is a simulation to examine whether the calculated p-value is approximately uniform. For simplicity, we consider the first variable, which is a null, and the function is also included at the beginning. 
 
@@ -135,11 +136,18 @@ The following is a simulation to examine whether the calculated p-value is appro
 # pval_adj <- replicate(B <- 100, sample_logistic(n, p, R, adjust = TRUE))
 ```
 
-You can also use the likelihood ratio test (LRT) by calling the function `lrt_glm`. It requires two arguments, the first is a list of `glm` fits and the second is the `param` output from `adjust_glm`. It prints the likelihood ratio statistics and p-values computed according to the rescaled chi-squared distribution. 
+You can also use the likelihood ratio test (LRT) by calling the function `lrt_glm`. It requires two arguments, the first is a list of `glm` fits and the second is the `param` output from `adjust_glm`. It prints the likelihood ratio statistics and p-values computed according to the rescaled chi-squared distribution. Under the null hypothesis 
+\[
+H_0:\quad \beta_1 = \ldots = \beta_k = 0,
+\]
+two times the likelihood ratio statistics $\Lambda$ is asymptotically a re-scaled chi-squared variable with $k$ degrees of freedom
+\[
+2 \Lambda \stackrel{d}{\longrightarrow} \frac{\sigma_\star^2}{\lambda_\star}\chi^2_k. 
+\]
 
 ```{r}
 f1 <- fit
-f2 <- glm(Y ~ X[, -p] + 0, family = binomial, x = TRUE, y = TRUE)
+f2 <- glm(Y ~ X[, -1] + 0, family = binomial, x = TRUE, y = TRUE)
 # P-values for the LRT
 lrt <- lrt_glm(list(f1, f2), param = adjusted_fit$param)
 print(lrt)
@@ -152,11 +160,11 @@ The previous example concerns a logistic model without an intercept, you can use
 ```{r}
 # Simulation setup
 X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
-beta <- rep(c(0, 2), p / 2) 
+beta <- rep(c(0, 2), each = p / 2) 
 Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta + 0.5)))
 # Fit a logistic regression
 fit <- glm(Y ~ X, family = binomial, x = TRUE, y = TRUE)
-# Estimate the bias and variance of the MLE
+# Adjust MLE coefficients
 adjusted_fit <- adjust_glm(fit, verbose = FALSE) 
 ```
 
@@ -166,10 +174,18 @@ You can find the estimated intercept (not the MLE) as follows.
 adjusted_fit$intercept
 ```
 
-You can also find the estimated bias and standard deviation as before. 
+You can also find the estimated bias and standard deviation as before. The asymptotic theory is similar to the previous case, where again
+\[
+\frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
+\]
+and further, the MLE of the intercept converges to some fixed quantity
+\[
+\hat{\beta}_0 \stackrel{p}{\longrightarrow} b_\star.
+\]
+The adjusted MLE is $\hat{\beta}^\mathrm{Adj} = \hat{\beta} / \alpha_star$ and adjusted std. is $\sigma_\star / \tau_j$. 
 
 ```{r}
-# Estimated bias and std.
+# Estimated inflation and std.
 adjusted_fit$param["alpha_s"]
 adjusted_fit$param["sigma_s"]
 # Adjusted MLE
@@ -178,21 +194,21 @@ adjusted_fit$coef_adj[p]
 adjusted_fit$std_adj[p]
 ```
 
-In this example, you can compare the estimated parameters with the true values.
+In this example, we can compute the true parameters and compare them with the estimates
 
 ```{r}
 gamma <- sqrt(sum((R %*% beta)^2/n))
 params <- find_param(kappa = p/n, gamma = gamma, beta0 = 0.5, verbose = FALSE)
-params[1] # true bias
-params[2] # true sd
+params[1] # true alpha_star
+params[3] # true sigma_star
 ```
 
-You can compare these estimates from that observed in repeated sampling. 
+You can compare also these estimates from observations from repeated samples. The observed average of $\hat{\beta}^\mathrm{MLE}_p$ is shown in black line, and its true value is shown in red line. 
 
 ```{r}
 sample_logistic_intercept <- function(n, p, R){
   X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
-  beta <- rep(c(0, 2), p / 2) 
+  beta <- rep(c(0, 2), each =  p / 2) 
   Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta + 0.5)))
   fit <- glm(Y ~ X, family = binomial, x = TRUE, y = TRUE)
   # Returns the p-th fitted coefficient and its standard error
@@ -206,11 +222,12 @@ beta_hat <- replicate(B, sample_logistic_intercept(n, p, R))
 
 ```{r, echo = FALSE}
 # plot fitted coefficients
-hist(beta_hat[1, ], main = expression(paste("Histogram of ",hat(beta)[p])),
+hist(beta_hat[1, ],
+     main = expression(paste("Histogram of ",hat(beta)[p])),
      xlab = "Estimated coefficients")
 abline(v = mean(beta_hat[1, ]), col = "red", lwd = 2)
-abline(v = 2, col = "black", lwd = 2)
+abline(v = 4, col = "black", lwd = 2)
 ```
 
-The observed bias is `r mean(beta_hat[1, ])/2` and observed standard deviation is `r sd(beta_hat[1, ])`. 
+The observed inflation is `r mean(beta_hat[1, ])/2` and observed standard deviation is `r sd(beta_hat[1, ])`. 
 
