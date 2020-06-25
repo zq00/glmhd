@@ -29,6 +29,7 @@
 #' }
 #' @importFrom stats pchisq
 #' @examples
+#' \dontrun{
 #' n <- 1000L
 #' p <- 300L
 #' X <- matrix(rnorm(n*p, 0, 1), n, p) / sqrt(p)
@@ -38,6 +39,7 @@
 #' f2 <- glm(Y ~ X[ , -1] + 0, family = binomial, x = TRUE, y = TRUE)
 #' adjusted_fit <- adjust_glm(f1)
 #' lrt_glm(list(f1, f2), adjusted_fit$param)
+#' }
 #' @export
 lrt_glm <- function(object, param){
   if(length(object) < 2){
