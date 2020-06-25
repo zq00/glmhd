@@ -24,6 +24,7 @@
 #'     three equations \eqn{(\lambda_\star, \sigma_\star, b_\star)}.
 #' @importFrom pracma fsolve
 #' @include equation_binary.R prox_op.R integrate2_normal.R logistic_model.R
+#' @export
 #' @examples
 #' # Compute parameters for a logistic model
 #' param <- find_param(kappa = 0.1, gamma = sqrt(5))
@@ -35,6 +36,7 @@
 #' param <- find_param(kappa = 0.1, gamma = 0, intercept = FALSE)
 #' # Asymptotic standard deviation
 #' param[3] / sqrt(0.1)
+
 find_param <- function(rho_prime = rho_prime_logistic,
                        f_prime1 = f_prime1_logistic,
                        f_prime0 = f_prime0_logistic,
