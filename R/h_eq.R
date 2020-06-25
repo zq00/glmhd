@@ -21,19 +21,24 @@
 #' success probability \eqn{\rho'}.
 #'
 #' @include hinge.R integrate2_normal.R
+#' @importFrom stats uniroot optim
 #' @param rho_prime Function. Success probability \eqn{\rho(t) = \mathrm{P}(Y=1\,|\, X^\top \beta = t)}
 #' @param beta0 Numeric. Intercept value.
 #' @param gamma0 Numeric. Signal strength.
+#' @param kappa Numeric. Problem dimension on the phase transition curve.
+#' @param verbose Print progress if \code{TRUE}.
 #' @return Numeric. Problem dimension \eqn{\kappa} (\eqn{\beta} or \eqn{\gamma}) on the phase transition curve.
 #' @references
 #' \emph{The phase transition for the existence of the maximum likelihood estimate in high-dimensional logistic regression}
 #' Emmanuel J. Candes and Pragya Sur, Ann. Statist., Volume 48, Number 1 (2020), 27-42.
 #'
 #' @examples
+#' \dontrun{
 #' # when Y is independent of X, should return 0.5 for logistic model
 #' # should return 0.5
 #' rho_prime_logistic <- function(t) 1 / (1 + exp(-t))
 #' solve_kappa(rho_prime_logistic, 0, 0)
+#' }
 
 solve_kappa <- function(rho_prime, beta0, gamma0){
   h <- function(t){
@@ -45,12 +50,12 @@ solve_kappa <- function(rho_prime, beta0, gamma0){
 }
 
 #' @rdname solve_kappa
-solve_beta <- function(rho_prime, kappa_hat, gamma, verbose = FALSE){
-  if(solve_kappa(rho_prime, 0, gamma) < kappa_hat){
+solve_beta <- function(rho_prime, kappa, gamma0, verbose = FALSE){
+  if(solve_kappa(rho_prime, 0, gamma0) < kappa){
     return(-1)
   }else{
     f <- function(beta){
-      val <- solve_kappa(rho_prime, beta, gamma) - kappa_hat
+      val <- solve_kappa(rho_prime, beta, gamma0) - kappa
       if(verbose) cat("beta = ", beta, "; diff = ", val, "\n")
       val
     }
@@ -61,12 +66,12 @@ solve_beta <- function(rho_prime, kappa_hat, gamma, verbose = FALSE){
 }
 
 #' @rdname solve_kappa
-solve_gamma <- function(rho_prime, kappa_hat, beta, verbose = FALSE){
-  if(solve_kappa(rho_prime, beta, 0) < kappa_hat){
+solve_gamma <- function(rho_prime, kappa, beta0, verbose = FALSE){
+  if(solve_kappa(rho_prime, beta0, 0) < kappa){
     return(0)
   }else{
     f <- function(gamma) {
-      val <- solve_kappa(rho_prime, beta, gamma) - kappa_hat
+      val <- solve_kappa(rho_prime, beta0, gamma) - kappa
       if(verbose) cat("gamma = ", gamma, "; diff = ", val, "\n")
       val
     }
