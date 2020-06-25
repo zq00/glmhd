@@ -13,10 +13,12 @@
 #' @param nn Number of observations in each subsample.
 #' @return Numeric. The proportion of separable subsamples.
 #' @examples
+#' \dontrun{
 #' n <- 1000; p <- 400
 #' X <- matrix(rnorm(n*p, 0, 1), n, p)
 #' Y <- 2 * rbinom(n, 1, 0.5) - 1
 #' separable_proportion(X, Y, nn = 600, B = 10)
+#' }
 separable_proportion <- function(X, Y, nn, B = 10){
   n <- nrow(X)
   is_sep <- numeric(B)
