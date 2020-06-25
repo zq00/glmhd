@@ -4,7 +4,7 @@
 #' high dimensional generalized linear models (glm).
 #'
 #' The function \code{adjust_glm} is built on the \code{\link[stats]{glm}} function: the input should be from the
-#' class \link[stats]{glm}, such as the output from \code{glm}.
+#' class \code{\link[stats]{glm}}, such as the output from \code{glm}.
 #' Currently, it works with binary regressions only, for which it calls the function \code{adjust_binary}
 #' to estimate coefficients and their standard deviations. In high dimensions,
 #' the magnitude of MLE is biased upward, and the variance estimates from classical theory based on
@@ -26,8 +26,9 @@
 #'     for example the output from the \code{\link[stats]{glm}} function
 #' @param verbose If \code{TRUE}, print progress at every step.
 #' @param echo If \code{TRUE}, returns the original \code{glm_output}.
-#' @seealso \code{\link{adjust_binary}}
-#' @references [TODO: add]
+#' @param ... Additional arguments.
+#' @seealso \code{\link{adjust_binary}} \code{\link{print.glmadj}}
+#'     \code{\link{summary.glmadj}} \code{\link{predict.glmadj}}
 #' @examples
 #' # Problem size
 #' n <- 1000L
@@ -43,101 +44,29 @@
 #' fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
 #' adjusted_fit <- adjust_glm(fit)
 #' # Print summary
-#' summary(adjusted_fit)
+#' print(summary(adjusted_fit))
 #' # Predict on new data
 #' predict(adjusted_fit)
 #' # Extract adjusted coefficients
-#' adjusted_fit$coef_adj
+#' head(adjusted_fit$coef_adj)
 #' # Extract adjusted standard error
-#' adjusted_fit$std_adj
+#' head(adjusted_fit$std_adj)
 #' @export
-adjust_glm <- function(glm_output, verbose, echo, ...) UseMethod("glmadj")
-
-#' @rdname adjust_glm
-glmadj.default <- function(glm_output, verbose = FALSE, echo = TRUE, ...){
+adjust_glm <- function(glm_output, verbose = FALSE, echo = TRUE, ...){
   if(glm_output$family$family == "binomial"){
     mle_adj <- adjust_binary(glm_output, verbose, echo)
+    # Fitted value is the linear part, i.e. eta
+    if(!is.null(mle_adj$intercept)){
+      mle_adj$fitted.values <- as.vector(mle_adj$intercept +
+                                           glm_output$x[ ,-1] %*% mle_adj$coef_adj)
+    }else{
+      mle_adj$fitted.values <- as.vector(glm_output$x %*% mle_adj$coef_adj)
+    }
+    mle_adj$call <- match.call()
+    class(mle_adj) <- "glmadj"
+    return(mle_adj)
   }else{
     stop("Not binary regression!")
   }
-  # Fitted value is the linear part, i.e. eta
-  if(!is.null(mle_adj$intercept)){
-    mle_adj$fitted.values <- as.vector(mle_adj$intercept +
-                                         glm_output$x[ ,-1] %*% mle_adj$coef_adj)
-  }else{
-    mle_adj$fitted.values <- as.vector(glm_output$x %*% mle_adj$coef_adj)
-  }
-  mle_adj$call <- match.call()
-  class(mle_adj) <- "glmadj"
-  mle_adj
 }
-
-#' @rdname adjust_glm
-print.glmadj <- function(object, ...){
-  cat("Call:\n")
-  print(object$call)
-  cat("\nCoefficients:\n")
-  print(object$coef_adj)
-}
-
-#' @rdname adjust_glm
-summary.glmadj <- function(object, ...){
-  se <- object$std_adj
-  tval <- object$coef_adj / se
-  TAB <- cbind(Estimate = object$coef_adj,
-               StdErr = se,
-               t.value = tval,
-               p.value = 2 * pnorm(-abs(tval)))
-  result <- list(call=object$call,
-                 coefficients=TAB)
-  class(result) <- "summary.glmadj"
-  result
-}
-
-#' @rdname adjust_glm
-print.summary.glmadj <- function(object, ...){
-  cat("Call:\n")
-  print(object$call)
-  cat("\n")
-  printCoefmat(object$coefficients, P.value=TRUE, has.Pvalue=TRUE)
-}
-
-#' @rdname adjust_glm
-predict.glmadj <- function(object, newdata = NULL, ...){
-  if(is.null(newdata))
-    y <- fitted(object)
-  else{
-    if(!is.null(object$glm_output$formula)){
-      # model has been fitted using formula interface
-      x <- model.matrix(object$glm_output$formula, newdata)
-    }
-    else{
-      warning("Missing model formula!")
-      x <- newdata
-    }
-    if(!is.null(mle_adj$intercept)){
-      y <- as.vector(object$intercept + x[ ,-1] %*% object$coef_adj)
-    }else{
-      y <- as.vector(x %*% object$coef_adj)
-    }
-  }
-  y
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
