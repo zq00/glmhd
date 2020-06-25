@@ -11,6 +11,8 @@ Description: This package estimates the bias and variance of maximum likelihood 
     of a generalized linear model (GLM). The estimates uses the high-dimensional asymptotics 
     assuming both sample size \eqn{n} and number of variables \eqn{p} goes to infinity. 
     In particular, the estimates assume that the variables are from a multivariate Gaussian or sub-Gaussian distribution. 
+URL: https://github.com/zq00/glmhd
+BugReports: https://github.com/zq00/glmhd/issues 
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
