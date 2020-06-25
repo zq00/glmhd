@@ -1,0 +1,45 @@
+Package: glmhd
+Title: Estimates the bias and variance of the MLE from a high-dimensional GLM
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Qian",
+           family = "Zhao",
+           role = c("aut", "cre"),
+           email = "qzhao1@stanford.edu",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: This package estimates the bias and variance of maximum likelihood estimators (MLE)
+    of a generalized linear model (GLM). The estimates uses the high-dimensional asymptotics 
+    assuming both sample size \eqn{n} and number of variables \eqn{p} goes to infinity. 
+    In particular, the estimates assume that the variables are from a multivariate Gaussian or sub-Gaussian distribution. 
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.0
+Imports:
+    cubature (>= 2.0.4),
+    ECOSolveR (>= 0.5.3),
+    pracma (>= 2.2.5)
+Suggests: 
+    knitr,
+    rmarkdown,
+    ggplot2,
+    purrr,
+    testthat
+VignetteBuilder: knitr
+Collate: 
+    'adjust_anova.R'
+    'logistic_model.R'
+    'is_separable.R'
+    'separable_proportion.R'
+    'probe_frontier.R'
+    'adjust_binary.R'
+    'binary_solve.R'
+    'integrate2_normal.R'
+    'prox_op.R'
+    'equation_binary.R'
+    'find_param.R'
+    'glmmod.R'
+    'hinge.R'
+    'h_eq.R'
+    'process_link.R'
+    'signal_strength.R'
