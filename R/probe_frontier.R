@@ -20,6 +20,7 @@
 #' @param eps Numeric. Minimum window size.
 #'     Terminate when the search interval is smaller than \code{eps}
 #' @param verbose Print prgress if \code{TRUE}.
+#' @importFrom stats glm family binomial
 #' @return Numeric. Estimated kappa_hat.
 #' @export
 #' @examples
