@@ -18,7 +18,8 @@ RoxygenNote: 7.1.0
 Imports:
     cubature (>= 2.0.4),
     ECOSolveR (>= 0.5.3),
-    pracma (>= 2.2.5)
+    pracma (>= 2.2.5),
+    stats
 Suggests: 
     knitr,
     rmarkdown,
@@ -41,5 +42,6 @@ Collate:
     'glmmod.R'
     'hinge.R'
     'h_eq.R'
+    'method_glmadj.R'
     'process_link.R'
     'signal_strength.R'
