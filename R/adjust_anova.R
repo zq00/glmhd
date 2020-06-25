@@ -27,8 +27,8 @@
 #' \item{models}{Model formula}
 #' \item{anova.tab}{Significance tables for the LRT}
 #' }
+#' @importFrom stats pchisq
 #' @examples
-#' \donttest{
 #' n <- 1000L
 #' p <- 300L
 #' X <- matrix(rnorm(n*p, 0, 1), n, p) / sqrt(p)
@@ -38,14 +38,10 @@
 #' f2 <- glm(Y ~ X[ , -1] + 0, family = binomial, x = TRUE, y = TRUE)
 #' adjusted_fit <- adjust_glm(f1)
 #' lrt_glm(list(f1, f2), adjusted_fit$param)
-#' }
 #' @export
-lrt_glm <- function(object, param, ...) UseMethod("lrt_adj")
-
-#' @rdname lrt_glm
-lrt_adj.default <- function(object, param, ...){
+lrt_glm <- function(object, param){
   if(length(object) < 2){
-    error("Please input at least two glm models!")
+    stop("Please input at least two glm models!")
   }else{
     # Extract the log-likelihood and degree of freedom
     df <- sapply(object, function(x) x$df.residual)
@@ -79,12 +75,11 @@ lrt_adj.default <- function(object, param, ...){
   result
 }
 
-#' @rdname lrt_glm
-print.lrt_adj <- function(object, ...){
+print.lrt_adj <- function(object){
   cat("Analysis of Deviance Table \n")
   for(i in 1:length(object$models)){
     cat(paste0("Model ", i, ": "))
     print(object$models[[i]])
   }
-  printCoefmat(object$anova.tab, P.value = TRUE, has.Pvalue = TRUE, na.print = " ")
+  printCoefmat(object$anova.tab, P.values = TRUE, has.Pvalue = TRUE, na.print = " ")
 }
