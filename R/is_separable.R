@@ -23,10 +23,12 @@
 #'
 #' \emph{Linear programming algorithms for detecting separated data in binary logistic regression models}, Kjell Konis, Ph.D. thesis, Univ. Oxford.
 #' @examples
+#' \dontrun{
 #' n <- 1000; p <- 400
 #' X <- matrix(rnorm(n*p, 0, 1), n, p)
 #' Y <- 2 * rbinom(n, 1, 0.5) - 1
 #' is_separable(X, Y, add_intercept = TRUE)
+#' }
 is_separable <- function(X, Y, add_intercept = FALSE){
   # Problem dimension
   n <- nrow(X); p <- ncol(X)
