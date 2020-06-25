@@ -7,11 +7,11 @@
 #' @param interval A vector of length 2. Interval that contains the zero.
 #' @param eps Terminate when the size of interval is less than eps.
 #' @param verbose Print progress if \code{TRUE}
-#'
 #' @examples
+#' \dontrun{
 #' f <- function(t) t
 #' binary_solve(f, c(-2, 2), eps = 0.001)
-
+#' }
 binary_solve <- function(f, interval, eps = 0.001, verbose = FALSE){
   l1 <- interval[1]; f1 <- f(l1)
   l2 <- interval[2]; f2 <- f(l2)
