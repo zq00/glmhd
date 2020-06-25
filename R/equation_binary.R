@@ -22,11 +22,9 @@
 #' If the model does not have an intercept, then \eqn{\beta_0 = 0}.
 #'
 #' @references
-#' \references{
 #' \emph{A modern maximum-likelihood theory for high-dimensional logistic regression},
 #' Pragya Sur and Emmanuel J. Candes,
 #' Proceedings of the National Academy of Sciences Jul 2019, 116 (29) 14516-14525
-#'}
 #' @keywords internal
 #' @include prox_op.R integrate2_normal.R
 #' @inheritParams find_param
