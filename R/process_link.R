@@ -12,8 +12,11 @@
 #' \item{f_prime1}{Derivative of the negative log-likelihood when \eqn{Y=1}}
 #' \item{f_prime0}{Derivative of the negative log-likelihood when \eqn{Y=0}}
 #' }
+#' @importFrom stats pnorm pcauchy dnorm dcauchy
 #' @examples
+#' \dontrun{
 #' process_link(binomial(link = "cloglog"))
+#' }
 process_link <- function(glm_family){
   rho_prime <-  switch(glm_family$link,
                        "logit" = rho_prime_logistic,
