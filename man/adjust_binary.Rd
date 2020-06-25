@@ -57,6 +57,7 @@ This implies \eqn{\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}^{MLE}_j / \alpha_\sta
 }
 
 \examples{
+\dontrun{
 # Problem size
 n <- 1000L
 p <- 300L
@@ -70,6 +71,7 @@ fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
 adjusted_fit <- adjust_binary(fit)
 # Adjusted MLE
 head(adjusted_fit$coef_unadj)
+}
 }
 \references{
 \emph{The Asymptotic Distribution of the MLE in High-dimensional Logistic Models: Arbitrary Covariance}, Qian Zhao, Pragya Sur and Emmanuel J. Candes, arXiv:2001.09351

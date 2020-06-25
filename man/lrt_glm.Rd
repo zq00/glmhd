@@ -37,6 +37,7 @@ re-scaled chi-squared distribution with \eqn{k} degrees of freedom
 where \eqn{(\sigma_\star, \lambda_\star)} can be computed using \code{find_param} function.
 }
 \examples{
+\dontrun{
 n <- 1000L
 p <- 300L
 X <- matrix(rnorm(n*p, 0, 1), n, p) / sqrt(p)
@@ -46,6 +47,7 @@ f1 <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
 f2 <- glm(Y ~ X[ , -1] + 0, family = binomial, x = TRUE, y = TRUE)
 adjusted_fit <- adjust_glm(f1)
 lrt_glm(list(f1, f2), adjusted_fit$param)
+}
 }
 \references{
 \emph{The likelihood ratio test in high-dimensional logistic regression is asymptotically a rescaled Chi-square},
