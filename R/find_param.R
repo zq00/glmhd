@@ -1,10 +1,9 @@
 #' Solves a system of nonlinear equations
 #'
 #' This function solves a system of equations, whose solution characterizes
-#' the asymptotic bias and variance of the M-estimator,
-#' as well as the Hessian of the loss function (in case of the MLE, it is the negative log-likelihood).
+#' the asymptotic bias and variance of the M-estimator (in case of the MLE, it is the negative log-likelihood).
 #'
-#' @param rho_prime A function that computes the success probability \eqn{\mathrm{P}(Y=1 | X^\top \beta)},
+#' @param rho_prime A function that computes the success probability \eqn{\rho'(t) = \mathrm{P}(Y=1 | X^\top \beta = t)},
 #'     here \eqn{\beta} is the coefficient. The default is logistic model.
 #' @param f_prime1 A function. Derivative of the loss function when \eqn{Y = 1}.
 #'     The default is the derivative of the negative log-likelihood of logistic
@@ -13,16 +12,16 @@
 #'     The default is the derivative of the negative log-likelihood of logistic
 #'     regression when \eqn{Y = -1}.
 #' @param kappa Numeric. The problem dimension \eqn{\kappa = p/n}.
-#' @param gamma Numeric. Signal strength \eqn{\gamma = \sqrt(\mathrm{Var}(X^\top \beta))}.
+#' @param gamma Numeric. Signal strength \eqn{\gamma = \sqrt{\mathrm{Var}(X^\top \beta)}}.
 #' @param beta0 Numeric. Intercept.
 #' @param intercept If \code{TRUE}, the glm contains an intercept term.
 #'     \code{intercept = TRUE} by default.
 #' @param verbose If \code{TRUE}, print progress at each step.
 #' @return A vector solution to the system. When \code{gamma != 0} and \code{b !=0},
-#'     it is \eqn{(\alpha_\star, \lambda_\star, \sigma_\star, b_\star)}.
-#'     When signal strength is zero (\code{gamma = 0}), solutions to the system with
-#'     three equations \eqn{(\lambda_\star, \sigma_\star, b_\star)}. When \code{gamma = 0} and
-#'     \code{b = 0}, returns \eqn{(\lambda_\star, \sigma_\star)}.
+#'     returns \eqn{(\alpha_\star, \lambda_\star, \sqrt{\kappa}\sigma_\star, b_\star)}.
+#'     When signal strength is zero (\code{gamma = 0}), returns the solution to the system with
+#'     three equations \eqn{(\lambda_\star, \sqrt{\kappa}\sigma_\star, b_\star)}. When \code{gamma = 0} and
+#'     \code{b = 0}, returns \eqn{(\lambda_\star, \sqrt{\kappa}\sigma_\star)}.
 #' @importFrom pracma fsolve
 #' @include equation_binary.R prox_op.R integrate2_normal.R logistic_model.R
 #' @export
