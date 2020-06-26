@@ -22,7 +22,7 @@ Terminate when the search interval is smaller than \code{eps}}
 \item{verbose}{Print prgress if \code{TRUE}.}
 }
 \value{
-Numeric. Estimated kappa_hat.
+Numeric. Estimated \eqn{\hat{\kappa}}.
 }
 \description{
 This function estimates the sample size \eqn{n_s}, or equivalently problem dimension

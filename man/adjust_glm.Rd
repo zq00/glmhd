@@ -31,14 +31,14 @@ applying the asymptotic theory assuming \eqn{p, n\to\infty} (\eqn{p<n}), and is 
 covariates \eqn{X} is multivariate Gaussian.
 
 \code{adjust_glm} creates an object from class \code{glmadj}. \code{summary.glmadj} creates a data table of adjusted coefficients,
-estiamtes of the standard error and p-values using a two-sided t-test. If
+estimates of the standard error and p-values using a two-sided t-test. If
 the covariates are multivariate Gaussian, the p-values are asymptotically
 from a uniform distribution.
 
 \code{predict.glmadj} computes the prediction \eqn{X^\top \hat{\beta}^{\mathrm{Adj}}} for
 new input data. The new data should be of the same format which you
 used to fit the \code{glm}. If there's no new data, it outputs the estimated
-\eqn{\eqn{X^\top \hat{\beta}_{\mathrm{Adj}}}} for the original dataset.
+\eqn{X^\top \hat{\beta}_{\mathrm{Adj}}} for the original dataset.
 }
 \examples{
 # Problem size
@@ -55,9 +55,9 @@ Y <- rbinom(n, 1, 1 / (1 + exp(- X \%*\% beta)))
 fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
 adjusted_fit <- adjust_glm(fit)
 # Print summary
-print(summary(adjusted_fit))
+print(summary(adjusted_fit), max = 40)
 # Predict on new data
-predict(adjusted_fit)
+head(predict(adjusted_fit))
 # Extract adjusted coefficients
 head(adjusted_fit$coef_adj)
 # Extract adjusted standard error

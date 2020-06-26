@@ -12,6 +12,13 @@ integrate2_normal(f, ...)
 
 \item{...}{Additional arguments to \link[cubature]{hcubature}}
 }
+\value{
+A numeric value
+\deqn{
+\int \int f(x, y) \varphi(x) \varphi(y) dx dy,
+}
+where \eqn{ \varphi(\cdot)} is the standard Gaussian density.
+}
 \description{
 Expected value of a function of two independent
 standard Gaussian variables

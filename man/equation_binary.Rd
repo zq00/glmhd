@@ -15,7 +15,7 @@ equation_binary(
 )
 }
 \arguments{
-\item{rho_prime}{A function that computes the success probability \eqn{\mathrm{P}(Y=1 | X^\top \beta)},
+\item{rho_prime}{A function that computes the success probability \eqn{\rho'(t) = \mathrm{P}(Y=1 | X^\top \beta = t)},
 here \eqn{\beta} is the coefficient. The default is logistic model.}
 
 \item{f_prime1}{A function. Derivative of the loss function when \eqn{Y = 1}.
@@ -28,7 +28,7 @@ regression when \eqn{Y = -1}.}
 
 \item{kappa}{Numeric. The problem dimension \eqn{\kappa = p/n}.}
 
-\item{gamma}{Numeric. Signal strength \eqn{\gamma = \sqrt(\mathrm{Var}(X^\top \beta))}.}
+\item{gamma}{Numeric. Signal strength \eqn{\gamma = \sqrt{\mathrm{Var}(X^\top \beta)}}.}
 
 \item{beta0}{Numeric. Intercept.}
 

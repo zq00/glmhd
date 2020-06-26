@@ -7,7 +7,7 @@
 binary_solve(f, interval, eps = 0.001, verbose = FALSE)
 }
 \arguments{
-\item{f}{Function to minimize.}
+\item{f}{Input function.}
 
 \item{interval}{A vector of length 2. Interval that contains the zero.}
 

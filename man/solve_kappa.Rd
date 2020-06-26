@@ -36,8 +36,10 @@ given the other one and \eqn{\kappa}.
 When covariates are multivariate Gaussian, the phase transition dimension
 can be characterized as following.
 \deqn{
-&\kappa > h_{\mathrm{MLE}}(\beta_0, \gamma_0) \implies \lim_{n,p\to\infty} \mathrm{P}(\text{MLE exists}) = 0\\
-&\kappa < h_{\mathrm{MLE}}(\beta_0, \gamma_0) \implies \lim_{n,p\to\infty} \mathrm{P}(\text{MLE exists}) = 1.
+\kappa > h_{\mathrm{MLE}}(\beta_0, \gamma_0) \implies \lim_{n,p\to\infty} \mathrm{P}(\text{MLE exists}) = 0
+}
+\deqn{
+\kappa < h_{\mathrm{MLE}}(\beta_0, \gamma_0) \implies \lim_{n,p\to\infty} \mathrm{P}(\text{MLE exists}) = 1.
 }
 The function \eqn{h} is defined to be
 \deqn{
