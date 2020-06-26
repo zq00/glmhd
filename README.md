@@ -12,7 +12,11 @@ install.packages("devtools")
 devtools::install_github("zq00/glmhd")
 ```
 
-To get started, please see package vignettes (it usually takes about 20 min to knit the whole document, feel free to run code line by line). 
+To get started, please see package vignettes (it usually takes about 20 min to knit the whole document, feel free to run code line by line). To install with vignettes, run
+
+```R
+devtools::install_github("zq00/glmhd", build_vignettes = TRUE)
+```
 
 You can read more about the theory of high dimensional logistic MLE here: 
 *The Asymptotic Distribution of the MLE in High-dimensional Logistic Models: Arbitrary Covariance*, by Qian Zhao, Pragya Sur and Emmanuel J. Candès, 	arXiv:2001.09351
