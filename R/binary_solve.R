@@ -3,7 +3,7 @@
 #' Binary search for zeros of a 1-d increasing function.
 #' Values at the left and right side of the interval should be negative and positive respectively.
 #'
-#' @param f Function to minimize.
+#' @param f Input function.
 #' @param interval A vector of length 2. Interval that contains the zero.
 #' @param eps Terminate when the size of interval is less than eps.
 #' @param verbose Print progress if \code{TRUE}
