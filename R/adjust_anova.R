@@ -10,9 +10,9 @@
 #' two times the likelihood ratio statistics \eqn{\Lambda} is asymptotically from a
 #' re-scaled chi-squared distribution with \eqn{k} degrees of freedom
 #' \deqn{
-#' 2 \Lambda \stackrel{d}{\longrightarrow} \frac{\sigma_\star^2}{\lambda_\star}\chi^2_k
+#' 2 \Lambda \stackrel{d}{\longrightarrow} \frac{\kappa \sigma_\star^2}{\lambda_\star}\chi^2_k
 #' }
-#' where \eqn{(\sigma_\star, \lambda_\star)} can be computed using \code{find_param} function.
+#' where \eqn{(\sigma_\star, \lambda_\star)} can be computed using \code{\link{find_param}} function.
 #'
 #' @references
 #' \emph{The likelihood ratio test in high-dimensional logistic regression is asymptotically a rescaled Chi-square},
