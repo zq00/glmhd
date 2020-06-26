@@ -42,7 +42,8 @@ regression when \eqn{Y = -1}.}
 A vector solution to the system. When \code{gamma != 0} and \code{b !=0},
     it is \eqn{(\alpha_\star, \lambda_\star, \sigma_\star, b_\star)}.
     When signal strength is zero (\code{gamma = 0}), solutions to the system with
-    three equations \eqn{(\lambda_\star, \sigma_\star, b_\star)}.
+    three equations \eqn{(\lambda_\star, \sigma_\star, b_\star)}. When \code{gamma = 0} and
+    \code{b = 0}, returns \eqn{(\lambda_\star, \sigma_\star)}.
 }
 \description{
 This function solves a system of equations, whose solution characterizes
@@ -59,5 +60,5 @@ param[3] / sqrt(0.1)
 # Another example
 param <- find_param(kappa = 0.1, gamma = 0, intercept = FALSE)
 # Asymptotic standard deviation
-param[3] / sqrt(0.1)
+param[2] / sqrt(0.1)
 }
