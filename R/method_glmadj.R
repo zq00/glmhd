@@ -38,7 +38,7 @@ print.summary.glmadj <- function(x, ...){
   cat("Call:\n")
   print(x$call)
   cat("\n")
-  printCoefmat(x$coefficients, P.values=TRUE, has.Pvalue=TRUE)
+  printCoefmat(x$coefficients, P.values=TRUE, has.Pvalue=TRUE, ...)
 }
 
 #' @param newdata A data frame created with \link[stats]{model.frame}.
