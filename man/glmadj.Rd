@@ -25,6 +25,16 @@
 
 \item{newdata}{A data frame created with \link[stats]{model.frame}.}
 }
+\value{
+A summary table with four columns
+\itemize{
+\item ajusted_mle \eqn{\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}_j^\mathrm{MLE} / \alpha_\star}.
+\item adjusted_std. Standard error of the adjusted MLE \eqn{\hat{\sigma}_j / \alpha_\star = \sigma_\star / \alpha_\star \tau_j}.
+\item t.value \eqn{t_j = \hat{\beta}_j^\mathrm{MLE} / \hat{\sigma}_j}. When \eqn{\beta_j = 0}, \eqn{t_j} is approximately
+    a standard Gaussian as \eqn{n,p \to\infty}.
+\item p.value 2-sided p-value using t.value to test whether \eqn{\beta_j = 0}.
+}
+}
 \description{
 Availabel methods for \code{glmadj} objects: print coefficients, summary,
 prediction
