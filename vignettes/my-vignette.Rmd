@@ -97,14 +97,14 @@ fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
 Now we call the function `adjust_glm` to compute the adjusted MLE and standard error.  There are three arguments for this function, but you only need to input the first one, the output `glm` object. Below, the second argument and third arguments are set at their default values, `verbose` specifies if progress should be printed, and `echo = TRUE` means that the input `glm` object is also returned in the output. By default, `verbose = TRUE` because it helps to track progress of the code, and identify issues if the algorithm fails. 
 
 ```{r}
-adjusted_fit <- adjust_glm(fit, verbose = TRUE, echo = TRUE)
+adjusted_fit <- adjust_glm(fit, verbose = FALSE, echo = TRUE)
 ```
 
 We now show you how to access the estimated inflation factor, and how to find the adjusted MLE and their standard error for the last variable. You can compare the estimated inflation `r adjusted_fit$param["alpha_s"]` with the observed value `r mean(beta_hat[1, ]) / 2`. As $n, p \to\infty$, the MLE of any coordinate $\beta_j$ satisfies 
 \[
 \frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
 \]
-where $\tau^2_j = \mathrm{Var}(x_j\,|\,x_{-j})$ is the conditional variance of $j$th variable given all the others. `adjusted_fit$param["alpha_s"]` outputs estimated $\alpha_\star$ and `adjusted_fit$param["sigma_s"]` outputs estimated $\sigma_\star$. The function computes an estimated standard error for each $\beta_j$, and the adjusted MLE satisfies
+where $\tau^2_j = \mathrm{Var}(x_j\,|\,x_{-j})$ is the conditional variance of $j$th variable given all the others. `adjusted_fit$param["alpha_s"]` outputs estimated $\alpha_\star$ and `adjusted_fit$param["sigma_s"]` outputs estimated $\sqrt{\kappa}\sigma_\star$. The function computes an estimated standard error for each $\beta_j$, and the adjusted MLE satisfies
 \[
 \frac{\hat{\beta}_j^\mathrm{Adj} - \beta_j}{\hat{\sigma}_j} \approx \mathcal{N}(0, 1),
 \]
@@ -122,7 +122,7 @@ adjusted_fit$std_adj[p]
 The function `summary` prints the coefficient table. 
 
 ```{r}
-print(summary(adjusted_fit))
+print(summary(adjusted_fit), max = 40)
 ```
 
 #### Hypothesis testing
@@ -141,7 +141,7 @@ H_0:\quad \beta_1 = \ldots = \beta_k = 0,
 \]
 two times the likelihood ratio statistics $\Lambda$ is asymptotically a re-scaled chi-squared variable with $k$ degrees of freedom
 \[
-2 \Lambda \stackrel{d}{\longrightarrow} \frac{\sigma_\star^2}{\lambda_\star}\chi^2_k. 
+2 \Lambda \stackrel{d}{\longrightarrow} \frac{\kappa_\star \sigma_\star^2}{\lambda_\star}\chi^2_k. 
 \]
 
 ```{r}
@@ -186,14 +186,14 @@ The adjusted MLE is $\hat{\beta}^\mathrm{Adj} = \hat{\beta} / \alpha_\star$ and 
 ```{r}
 # Estimated inflation and std.
 adjusted_fit$param["alpha_s"]
-adjusted_fit$param["sigma_s"]
+adjusted_fit$param["sigma_s"] / sqrt(p/n)
 # Adjusted MLE
 adjusted_fit$coef_adj[p]
 # Adjusted std.
 adjusted_fit$std_adj[p]
 ```
 
-In this example, we can compute the true parameters and compare them with the estimates
+In this example, we can compute the true parameters and compare them with the estimates. Notice that the input `beta_0` for `find_param` is the absolute value of the intercept $\beta_0$. 
 
 ```{r}
 gamma <- sqrt(sum((R %*% beta)^2/n))
@@ -232,5 +232,5 @@ The observed inflation is `r mean(beta_hat[1, ])/2` and observed standard deviat
 
 #### Other link functions
 
-If you are working with a probit model, you can use the glm function with `family = binomial(link = "probit")`, and use the `glm` object as input to `adjust_glm` function. It automatically identifies the link function from the `family` object. 
+If you are working with a probit model, you can use the `glm` function with `family = binomial(link = "probit")`, and use the `glm` object as input to `adjust_glm` function. It automatically identifies the link function from the `family` object. 
 
