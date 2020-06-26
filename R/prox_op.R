@@ -5,7 +5,7 @@
 #' @param x Numeric. Input variable.
 #' @return A numeric value
 #'     \deqn{\mathrm{prox}_{\lambda f}(x) = \mathrm{argmin}_x f(z) + \frac{1}{2\lambda}(z-x)^2.}
-#'     Solution to the equation
+#'     It solves the equation
 #'     \deqn{f'(z) + \frac{1}{\lambda}(z-x) = 0.}
 #' @importFrom stats uniroot
 #' @examples
