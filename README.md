@@ -8,7 +8,6 @@ You can install the package using
 
 ```R
 install.packages("devtools")
-
 devtools::install_github("zq00/glmhd")
 ```
 
