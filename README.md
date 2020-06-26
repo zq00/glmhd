@@ -22,4 +22,4 @@ Alternatively, you can start by checking documentation for function `adjust_glm`
 You can read more about the theory of high dimensional logistic MLE here: 
 *The Asymptotic Distribution of the MLE in High-dimensional Logistic Models: Arbitrary Covariance*, by Qian Zhao, Pragya Sur and Emmanuel J. Candès, 	arXiv:2001.09351
 
-If you encounter error or could like to provide feedbacks to us, please use Github -> Issues. Thank you! 
+If you encounter error or would like to provide feedbacks, please use Github -> Issues to reach us. Thank you! 
