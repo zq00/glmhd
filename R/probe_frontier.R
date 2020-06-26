@@ -21,7 +21,7 @@
 #'     Terminate when the search interval is smaller than \code{eps}
 #' @param verbose Print prgress if \code{TRUE}.
 #' @importFrom stats glm family binomial
-#' @return Numeric. Estimated kappa_hat.
+#' @return Numeric. Estimated \eqn{\hat{\kappa}}.
 #' @export
 #' @examples
 #' # Y is independent of X, kappa_s is approximately 0.5
