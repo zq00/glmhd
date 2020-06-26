@@ -3,6 +3,12 @@
 #' Expected value of a function of two independent
 #' standard Gaussian variables
 #'
+#' @return A numeric value
+#' \deqn{
+#' \int \int f(x, y) \varphi(x) \varphi(y) dx dy,
+#' }
+#' where \eqn{ \varphi(\cdot)} is the standard Gaussian density.
+#'
 #' @param f Function to integrate over. Input to
 #' \code{f} should be a length 2 vector.
 #' @param ... Additional arguments to \link[cubature]{hcubature}
