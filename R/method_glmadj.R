@@ -28,7 +28,7 @@ print.glmadj <- function(x, ...){
 #' }
 #' @export
 summary.glmadj <- function(object, ...){
-  se <- object$std_adj / object$param["alpha_s"])
+  se <- object$std_adj / object$param["alpha_s"]
   tval <- object$coef_adj / se
   TAB <- cbind(adjusted_mle = object$coef_adj,
                adjusted_std = se,
