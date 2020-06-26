@@ -18,12 +18,20 @@ print.glmadj <- function(x, ...){
 
 #' @rdname glmadj
 #' @param object A \code{glmadj} object, created from \code{\link{adjust_glm}}.
+#' @return A summary table with four columns
+#' \itemize{
+#' \item ajusted_mle \eqn{\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}_j^\mathrm{MLE} / \alpha_\star}.
+#' \item adjusted_std. Standard error of the adjusted MLE \eqn{\hat{\sigma}_j / \alpha_\star = \sigma_\star / \alpha_\star \tau_j}.
+#' \item t.value \eqn{t_j = \hat{\beta}_j^\mathrm{MLE} / \hat{\sigma}_j}. When \eqn{\beta_j = 0}, \eqn{t_j} is approximately
+#'     a standard Gaussian as \eqn{n,p \to\infty}.
+#' \item p.value 2-sided p-value using t.value to test whether \eqn{\beta_j = 0}.
+#' }
 #' @export
 summary.glmadj <- function(object, ...){
-  se <- object$std_adj
+  se <- object$std_adj / object$param["alpha_s"])
   tval <- object$coef_adj / se
-  TAB <- cbind(Estimate = object$coef_adj,
-               StdErr = se,
+  TAB <- cbind(adjusted_mle = object$coef_adj,
+               adjusted_std = se,
                t.value = tval,
                p.value = 2 * pnorm(-abs(tval)))
   result <- list(call=object$call,
