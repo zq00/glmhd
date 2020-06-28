@@ -18,7 +18,7 @@ print.glmadj <- function(x, ...){
 
 #' @rdname glmadj
 #' @param object A \code{glmadj} object, created from \code{\link{adjust_glm}}.
-#' @return A summary table with four columns
+#' @return \code{\link{summary.glmadj}} returns a summary table with four columns
 #' \itemize{
 #' \item ajusted_mle \eqn{\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}_j^\mathrm{MLE} / \alpha_\star}.
 #' \item adjusted_std. Standard error of the adjusted MLE \eqn{\hat{\sigma}_j / \alpha_\star = \sigma_\star / \alpha_\star \tau_j}.
