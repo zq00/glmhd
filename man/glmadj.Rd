@@ -26,7 +26,7 @@
 \item{newdata}{A data frame created with \link[stats]{model.frame}.}
 }
 \value{
-A summary table with four columns
+\code{\link{summary.glmadj}} returns a summary table with four columns
 \itemize{
 \item ajusted_mle \eqn{\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}_j^\mathrm{MLE} / \alpha_\star}.
 \item adjusted_std. Standard error of the adjusted MLE \eqn{\hat{\sigma}_j / \alpha_\star = \sigma_\star / \alpha_\star \tau_j}.

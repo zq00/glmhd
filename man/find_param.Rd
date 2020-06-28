@@ -61,3 +61,7 @@ param <- find_param(kappa = 0.1, gamma = 0, intercept = FALSE)
 # Asymptotic standard deviation
 param[2] / sqrt(0.1)
 }
+\references{
+\emph{The Impact of Regularization on High-dimensional Logistic Regression},
+Fariborz Salehi, Ehsan Abbasi and Babak Hassibi, Proceedings of NeurIPS 2019.
+}

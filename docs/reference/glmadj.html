@@ -164,6 +164,16 @@ prediction</p>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p><code>summary.glmadj</code> returns a summary table with four columns</p><ul>
+<li><p>ajusted_mle \(\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}_j^\mathrm{MLE} / \alpha_\star\).</p></li>
+<li><p>adjusted_std. Standard error of the adjusted MLE \(\hat{\sigma}_j / \alpha_\star = \sigma_\star / \alpha_\star \tau_j\).</p></li>
+<li><p>t.value \(t_j = \hat{\beta}_j^\mathrm{MLE} / \hat{\sigma}_j\). When \(\beta_j = 0\), \(t_j\) is approximately
+    a standard Gaussian as \(n,p \to\infty\).</p></li>
+<li><p>p.value 2-sided p-value using t.value to test whether \(\beta_j = 0\).</p></li>
+</ul>
+
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='adjust_glm.html'>adjust_glm</a></code></p></div>
