@@ -24,6 +24,9 @@
 #'     \code{b = 0}, returns \eqn{(\lambda_\star, \sqrt{\kappa}\sigma_\star)}.
 #' @importFrom pracma fsolve
 #' @include equation_binary.R prox_op.R integrate2_normal.R logistic_model.R
+#' @references
+#' \emph{The Impact of Regularization on High-dimensional Logistic Regression},
+#' Fariborz Salehi, Ehsan Abbasi and Babak Hassibi, Proceedings of NeurIPS 2019.
 #' @export
 #' @examples
 #' # Compute parameters for a logistic model
