@@ -44,7 +44,7 @@ sample_logistic <- function(n, p, R, adjust = FALSE){
   # Generate data matrix
   X <- matrix(rnorm(n * p, 0, 1), n, p) %*%  R / sqrt(n)
   # Generate parameters
-  beta <- rep(c(0, 2), p / 2) 
+  beta <- rep(c(0, 2), each = p / 2) 
   # Sample response 
   Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
   # Logistic regression 
