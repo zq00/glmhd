@@ -202,7 +202,7 @@ params[1] # true alpha_star
 params[3] / sqrt(p/n) # true sigma_star
 ```
 
-You can compare also these estimates from observations from repeated samples. The observed average of $\hat{\beta}^\mathrm{MLE}_p$ is shown in black line, and its true value is shown in red line.
+You can compare also these estimates from observations from repeated samples. The observed average of $\hat{\beta}^\mathrm{MLE}_p$ is shown in red line, and its true value is shown in black line.
 
 ```{r}
 sample_logistic_intercept <- function(n, p, R){
