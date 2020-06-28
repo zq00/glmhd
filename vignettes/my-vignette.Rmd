@@ -106,9 +106,9 @@ We now show you how to access the estimated inflation factor, and how to find th
 \]
 where $\tau^2_j = \mathrm{Var}(x_j\,|\,x_{-j})$ is the conditional variance of $j$th variable given all the others. `adjusted_fit$param["alpha_s"]` outputs estimated $\alpha_\star$ and `adjusted_fit$param["sigma_s"]` outputs estimated $\sqrt{\kappa}\sigma_\star$. The function computes an estimated standard error for each $\beta_j$, and the adjusted MLE satisfies
 \[
-\frac{\hat{\beta}_j^\mathrm{Adj} - \beta_j}{\hat{\sigma}_j} \approx \mathcal{N}(0, 1),
+\frac{\hat{\beta}_j^\mathrm{Adj} - \beta_j}{\hat{\sigma}_j / \alpha_\star} \approx \mathcal{N}(0, 1),
 \]
-for $\hat{\sigma}_j = \sigma_\star / \tau_j$ the adjusted std. 
+for $\hat{\sigma}_j = \sigma_\star / \tau_j$ the adjusted std. estimate.
 
 ```{r}
 # Estimated bias 
@@ -127,7 +127,7 @@ print(summary(adjusted_fit), max = 40)
 
 #### Hypothesis testing
 
-The `summary` function prints the adjusted MLE $\hat{\beta}$ and std. $\hat{\sigma}$, as well as a t-statistics $t = \hat{\beta}/\hat{\sigma}$ and a P-value $\mathrm{P}(|\mathcal{N}(0,1)|\geq |t|)$. If the variables are multivariate Gaussian and the true model is logistic, then this p-value is from a Uniform[0,1] distribution. 
+The `summary` function prints the adjusted MLE $\hat{\beta}^\mathrm{Adj}$ and its std. $\hat{\sigma} / \alpha_\star$, as well as a t-statistics $t = \hat{\beta}/\hat{\sigma}^\mathrm{MLE}$ and a P-value $\mathrm{P}(|\mathcal{N}(0,1)|\geq |t|)$. If the variables are multivariate Gaussian and the true model is logistic, then this p-value is from a Uniform[0,1] distribution under the null hypothesis that $\beta_j = 0$. 
 
 The following is a simulation to examine whether the calculated p-value is approximately uniform. For simplicity, we consider the first variable, which is a null, and the function is also included at the beginning. 
 
@@ -199,7 +199,7 @@ In this example, we can compute the true parameters and compare them with the es
 gamma <- sqrt(sum((R %*% beta)^2/n))
 params <- find_param(kappa = p/n, gamma = gamma, beta0 = 0.5, verbose = FALSE)
 params[1] # true alpha_star
-params[3] # true sigma_star
+params[3] / sqrt(p/n) # true sigma_star
 ```
 
 You can compare also these estimates from observations from repeated samples. The observed average of $\hat{\beta}^\mathrm{MLE}_p$ is shown in black line, and its true value is shown in red line.
@@ -225,7 +225,7 @@ hist(beta_hat[1, ],
      main = expression(paste("Histogram of ",hat(beta)[p])),
      xlab = "Estimated coefficients")
 abline(v = mean(beta_hat[1, ]), col = "red", lwd = 2)
-abline(v = 4, col = "black", lwd = 2)
+abline(v = 2, col = "black", lwd = 2)
 ```
 
 The observed inflation is `r mean(beta_hat[1, ])/2` and observed standard deviation is `r sd(beta_hat[1, ])`.
