@@ -101,7 +101,7 @@
   <span class="co"># Generate data matrix</span>
   <span class="no">X</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="no">n</span> * <span class="no">p</span>, <span class="fl">0</span>, <span class="fl">1</span>), <span class="no">n</span>, <span class="no">p</span>) <span class="kw">%*%</span>  <span class="no">R</span> / <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="no">n</span>)
   <span class="co"># Generate parameters</span>
-  <span class="no">beta</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>, <span class="fl">2</span>), <span class="no">p</span> / <span class="fl">2</span>)
+  <span class="no">beta</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>, <span class="fl">2</span>), <span class="kw">each</span> <span class="kw">=</span> <span class="no">p</span> / <span class="fl">2</span>)
   <span class="co"># Sample response </span>
   <span class="no">Y</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html">rbinom</a></span>(<span class="no">n</span>, <span class="fl">1</span>, <span class="fl">1</span> / (<span class="fl">1</span> + <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(- <span class="no">X</span> <span class="kw">%*%</span> <span class="no">beta</span>)))
   <span class="co"># Logistic regression </span>
@@ -120,7 +120,7 @@
 <span class="no">R</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/chol.html">chol</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/toeplitz.html">toeplitz</a></span>(<span class="fl">0.5</span>^(<span class="fl">0</span>:(<span class="no">p</span> - <span class="fl">1</span>))))
 <span class="no">beta_hat</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span>(<span class="no">B</span> <span class="kw">&lt;-</span> <span class="fl">200</span>, <span class="fu">sample_logistic</span>(<span class="no">n</span>, <span class="no">p</span>, <span class="no">R</span>))</pre></body></html></div>
 <p><img src="my-vignette_files/figure-html/unnamed-chunk-6-1.png" width="480" style="display: block; margin: auto;"></p>
-<p>As we can see, the estimated <span class="math inline">\(\hat{\beta}\)</span> is not centered at the true value <span class="math inline">\(\beta = 2\)</span> (black line), but at some larger 2.068 (red line). Further, the estimated standard error 3.189 is smaller than the observed standard deviation 3.763 from independent samples.</p>
+<p>As we can see, the estimated <span class="math inline">\(\hat{\beta}\)</span> is not centered at the true value <span class="math inline">\(\beta = 2\)</span> (black line), but at some larger 2.534 (red line). Further, the estimated standard error 3.368 is smaller than the observed standard deviation 4.237 from independent samples.</p>
 <p>The goal of this package is to estimate the inflation and standard deviation of the MLE more accurately than the classical theory. The procedure is based on the asymptotic distribution of the MLE when <span class="math inline">\(n, p\to\infty\)</span> at a fixed ratio <span class="math inline">\(p / n\to \kappa \in (0, 1)\)</span>. Further, the theory requires the variables <span class="math inline">\(X\)</span> to be multivariate Gaussian. Now let’s load the library.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">glmhd</span>)</pre></body></html></div>
 <p>Let’s repeat the previous example and compute the MLE. Note here we specify <code>x = TRUE</code> and <code>y = TRUE</code> so the original data matrix is returned in <code>fit</code>.</p>
@@ -131,7 +131,7 @@
 <span class="no">fit</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span>(<span class="no">Y</span> ~ <span class="no">X</span> + <span class="fl">0</span>, <span class="kw">family</span> <span class="kw">=</span> <span class="no">binomial</span>, <span class="kw">x</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">y</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
 <p>Now we call the function <code>adjust_glm</code> to compute the adjusted MLE and standard error. There are three arguments for this function, but you only need to input the first one, the output <code>glm</code> object. Below, the second argument and third arguments are set at their default values, <code>verbose</code> specifies if progress should be printed, and <code>echo = TRUE</code> means that the input <code>glm</code> object is also returned in the output. By default, <code>verbose = TRUE</code> because it helps to track progress of the code, and identify issues if the algorithm fails.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">adjusted_fit</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/adjust_glm.html">adjust_glm</a></span>(<span class="no">fit</span>, <span class="kw">verbose</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">echo</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
-<p>We now show you how to access the estimated inflation factor, and how to find the adjusted MLE and their standard error for the last variable. You can compare the estimated inflation 1.314 with the observed value 1.034. As <span class="math inline">\(n, p \to\infty\)</span>, the MLE of any coordinate <span class="math inline">\(\beta_j\)</span> satisfies <span class="math display">\[
+<p>We now show you how to access the estimated inflation factor, and how to find the adjusted MLE and their standard error for the last variable. You can compare the estimated inflation 1.322 with the observed value 1.267. As <span class="math inline">\(n, p \to\infty\)</span>, the MLE of any coordinate <span class="math inline">\(\beta_j\)</span> satisfies <span class="math display">\[
 \frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
 \]</span> where <span class="math inline">\(\tau^2_j = \mathrm{Var}(x_j\,|\,x_{-j})\)</span> is the conditional variance of <span class="math inline">\(j\)</span>th variable given all the others. <code>adjusted_fit$param["alpha_s"]</code> outputs estimated <span class="math inline">\(\alpha_\star\)</span> and <code>adjusted_fit$param["sigma_s"]</code> outputs estimated <span class="math inline">\(\sqrt{\kappa}\sigma_\star\)</span>. The function computes an estimated standard error for each <span class="math inline">\(\beta_j\)</span>, and the adjusted MLE satisfies <span class="math display">\[
 \frac{\hat{\beta}_j^\mathrm{Adj} - \beta_j}{\hat{\sigma}_j / \alpha_\star} \approx \mathcal{N}(0, 1),
@@ -139,29 +139,29 @@
 <div class="sourceCode"><html><body><pre class="r"><span class="co"># Estimated bias </span>
 <span class="no">adjusted_fit</span>$<span class="no">param</span>[<span class="st">"alpha_s"</span>]
 <span class="co">#&gt; alpha_s </span>
-<span class="co">#&gt;    1.31</span>
+<span class="co">#&gt;    1.32</span>
 <span class="co"># Adjusted MLE</span>
 <span class="no">adjusted_fit</span>$<span class="no">coef_adj</span>[<span class="no">p</span>]
 <span class="co">#&gt; X200 </span>
-<span class="co">#&gt; 2.36</span>
+<span class="co">#&gt; 3.52</span>
 <span class="co"># Adjusted std. </span>
 <span class="no">adjusted_fit</span>$<span class="no">std_adj</span>[<span class="no">p</span>]
 <span class="co">#&gt; X200 </span>
-<span class="co">#&gt; 3.81</span></pre></body></html></div>
+<span class="co">#&gt; 3.96</span></pre></body></html></div>
 <p>The function <code>summary</code> prints the coefficient table.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">adjusted_fit</span>), <span class="kw">max</span> <span class="kw">=</span> <span class="fl">40</span>)
 <span class="co">#&gt; Call:</span>
 <span class="co">#&gt; adjust_glm(glm_output = fit, verbose = FALSE, echo = TRUE)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      adjusted_mle adjusted_std t.value p.value   </span>
-<span class="co">#&gt; X1       -0.71211      2.86276   -0.25  0.8036   </span>
-<span class="co">#&gt; X2        2.03507      3.31117    0.61  0.5388   </span>
-<span class="co">#&gt; X3       -2.39009      3.29432   -0.73  0.4681   </span>
-<span class="co">#&gt; X4       -0.91846      3.18423   -0.29  0.7730   </span>
-<span class="co">#&gt; X5        4.85006      3.19446    1.52  0.1289   </span>
-<span class="co">#&gt; X6       -7.27673      3.30911   -2.20  0.0279 * </span>
-<span class="co">#&gt; X7        4.61155      3.28138    1.41  0.1599   </span>
-<span class="co">#&gt; X8       -2.70353      3.22414   -0.84  0.4017   </span>
+<span class="co">#&gt; X1       3.38e+00     2.92e+00    1.16  0.2470   </span>
+<span class="co">#&gt; X2      -3.50e+00     3.17e+00   -1.10  0.2693   </span>
+<span class="co">#&gt; X3      -3.00e-01     3.13e+00   -0.10  0.9238   </span>
+<span class="co">#&gt; X4      -2.68e+00     3.27e+00   -0.82  0.4123   </span>
+<span class="co">#&gt; X5      -2.92e+00     3.32e+00   -0.88  0.3778   </span>
+<span class="co">#&gt; X6       5.38e+00     3.29e+00    1.64  0.1014   </span>
+<span class="co">#&gt; X7      -2.97e+00     3.34e+00   -0.89  0.3730   </span>
+<span class="co">#&gt; X8       1.96e+00     3.40e+00    0.58  0.5650   </span>
 <span class="co">#&gt;  [ reached getOption("max.print") -- omitted 192 rows ]</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></pre></body></html></div>
@@ -191,8 +191,8 @@ H_0:\quad \beta_1 = \ldots = \beta_k = 0,
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $anova.tab</span>
 <span class="co">#&gt;   Resid.Df Resid.Dev Df Deviance p.value</span>
-<span class="co">#&gt; 1      801       950 NA       NA      NA</span>
-<span class="co">#&gt; 2      800       949  1   0.0801   0.805</span>
+<span class="co">#&gt; 1      801       935 NA       NA      NA</span>
+<span class="co">#&gt; 2      800       933  1     1.82    0.24</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; attr(,"class")</span>
 <span class="co">#&gt; [1] "lrt_adj"</span></pre></body></html></div>
@@ -212,7 +212,7 @@ H_0:\quad \beta_1 = \ldots = \beta_k = 0,
 <p>You can find the estimated intercept (not the MLE) as follows.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">adjusted_fit</span>$<span class="no">intercept</span>
 <span class="co">#&gt; (Intercept) </span>
-<span class="co">#&gt;      -0.422</span></pre></body></html></div>
+<span class="co">#&gt;      -0.454</span></pre></body></html></div>
 <p>You can also find the estimated bias and standard deviation as before. The asymptotic theory is similar to the previous case, where again <span class="math display">\[
   \frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
   \]</span> and further, the MLE of the intercept converges to some fixed quantity <span class="math display">\[
@@ -221,18 +221,18 @@ H_0:\quad \beta_1 = \ldots = \beta_k = 0,
 <div class="sourceCode"><html><body><pre class="r"><span class="co"># Estimated inflation and std.</span>
 <span class="no">adjusted_fit</span>$<span class="no">param</span>[<span class="st">"alpha_s"</span>]
 <span class="co">#&gt; alpha_s </span>
-<span class="co">#&gt;    1.33</span>
+<span class="co">#&gt;    1.34</span>
 <span class="no">adjusted_fit</span>$<span class="no">param</span>[<span class="st">"sigma_s"</span>] / <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="no">p</span>/<span class="no">n</span>)
 <span class="co">#&gt; sigma_s </span>
-<span class="co">#&gt;     3.4</span>
+<span class="co">#&gt;    3.49</span>
 <span class="co"># Adjusted MLE</span>
 <span class="no">adjusted_fit</span>$<span class="no">coef_adj</span>[<span class="no">p</span>]
 <span class="co">#&gt; X200 </span>
-<span class="co">#&gt; 3.25</span>
+<span class="co">#&gt; 10.5</span>
 <span class="co"># Adjusted std.</span>
 <span class="no">adjusted_fit</span>$<span class="no">std_adj</span>[<span class="no">p</span>]
 <span class="co">#&gt; X200 </span>
-<span class="co">#&gt; 3.82</span></pre></body></html></div>
+<span class="co">#&gt; 4.17</span></pre></body></html></div>
 <p>In this example, we can compute the true parameters and compare them with the estimates. Notice that the input <code>beta_0</code> for <code>find_param</code> is the absolute value of the intercept <span class="math inline">\(\beta_0\)</span>.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">gamma</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span>((<span class="no">R</span> <span class="kw">%*%</span> <span class="no">beta</span>)^<span class="fl">2</span>/<span class="no">n</span>))
 <span class="no">params</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/find_param.html">find_param</a></span>(<span class="kw">kappa</span> <span class="kw">=</span> <span class="no">p</span>/<span class="no">n</span>, <span class="kw">gamma</span> <span class="kw">=</span> <span class="no">gamma</span>, <span class="kw">beta0</span> <span class="kw">=</span> <span class="fl">0.5</span>, <span class="kw">verbose</span> <span class="kw">=</span> <span class="fl">FALSE</span>)
@@ -251,7 +251,7 @@ H_0:\quad \beta_1 = \ldots = \beta_k = 0,
 }</pre></body></html></div>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">beta_hat</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span>(<span class="no">B</span>, <span class="fu">sample_logistic_intercept</span>(<span class="no">n</span>, <span class="no">p</span>, <span class="no">R</span>))</pre></body></html></div>
 <p><img src="my-vignette_files/figure-html/unnamed-chunk-19-1.png" width="480" style="display: block; margin: auto;"></p>
-<p>The observed inflation is 1.361 and observed standard deviation is 3.553.</p>
+<p>The observed inflation is 1.555 and observed standard deviation is 4.005.</p>
 </div>
 <div id="other-link-functions" class="section level4">
 <h4 class="hasAnchor">
