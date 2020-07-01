@@ -23,7 +23,7 @@ To install with vignettes, please run
 devtools::install_github("zq00/glmhd", build_vignettes = TRUE)
 ```
 
-Note that the vignette takes about 20 min to knit, so feel free to download the [Rmarkdown file](https://github.com/zq00/glmhd/tree/master/vignettes) and run code line by line..  
+Note that the vignette takes about 20 min to knit, so feel free to download the [Rmarkdown file](https://github.com/zq00/glmhd/tree/master/vignettes) and run code line by line.
 
 ## Function documentation
 
