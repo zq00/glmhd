@@ -31,4 +31,4 @@ You can find the function documentations under the [Reference](https://zq00.gith
 
 ## Feedback
 
-If you encounter errors or would like to provide feedbacks, please use [Github -> Issues](https://github.com/zq00/glmhd/issues) to reach us. Thank you! 
+If you encounter error or would like to provide feedback, please use [Github -> Issues](https://github.com/zq00/glmhd/issues) to reach us. Thank you! 
