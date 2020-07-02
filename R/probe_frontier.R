@@ -22,6 +22,10 @@
 #' @param verbose Print prgress if \code{TRUE}.
 #' @importFrom stats glm family binomial
 #' @return Numeric. Estimated \eqn{\hat{\kappa}}.
+#' @references
+#' \emph{A modern maximum-likelihood theory for high-dimensional logistic regression},
+#' Pragya Sur and Emmanuel J. Candes,
+#' Proceedings of the National Academy of Sciences Jul 2019, 116 (29) 14516-14525
 #' @export
 #' @examples
 #' # Y is independent of X, kappa_s is approximately 0.5
