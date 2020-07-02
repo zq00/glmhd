@@ -33,18 +33,20 @@ options(max.print = 20, digits = 3)
 
 In this vignette we will show you how to use functions in the `glmhd` package to estimate the bias and variance of high dimensional logistic MLE (maximum likelihood estimates). "High dimension" refers to the setting when the number of observations $n$ and number of variables $p$ are both large. 
 
-As a recurring example, we consider a logistic regression model, and for simplicity, we fix the the first half variables to be null and the second half have fixed coefficients $\beta = 2$. 
+#### Warm-up
+
+As a recurring example, we consider a logistic regression model. 
 
 ```{r}
 # Sample from a logistic model
-#     n, p - number of samples and number of variables
-#     R - cholesky decomposition of the covariance matrix of the variables
+#     n - number of samples 
+#     beta - coefficient vector
+#     R - cholesky decomposition of the covariance matrix (R^t R) of the variables 
 #     adjust - if TRUE, computes the adjusted p-value for H0: beta1 = 0
-sample_logistic <- function(n, p, R, adjust = FALSE){
+sample_logistic <- function(n, beta, R, adjust = FALSE){
+  p <- length(beta) # number of variables
   # Generate data matrix
   X <- matrix(rnorm(n * p, 0, 1), n, p) %*%  R / sqrt(n)
-  # Generate parameters
-  beta <- rep(c(0, 2), each = p / 2) 
   # Sample response 
   Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
   # Logistic regression 
@@ -60,66 +62,86 @@ sample_logistic <- function(n, p, R, adjust = FALSE){
 }
 ```
 
-We repeat this function $B = 200$ times, and draw a histogram of the MLE of the $p$th coefficient. We pick $n = 1000$ and $p = 200$, and set the variables to be from multivariate Gaussian from a AR(1) model with $\rho = 0.5$.
+We pick $n = 1000$ and $p = 200$, and set the variables to be from multivariate Gaussian from a AR(1) model with $\rho = 0.5$. For simplicity, we fix the the first half variables to be null and the second half have fixed coefficients $\beta = 4$. 
 
 ```{r}
 n <- 1000; p <- 200
 R <- chol(toeplitz(0.5^(0:(p - 1))))
-beta_hat <- replicate(B <- 200, sample_logistic(n, p, R))
+beta <- rep(c(0, 4), each = p / 2)
+```
+
+We repeat this function $B = 200$ times, and draw a histogram of the MLE of the $p$th coefficient. 
+
+```{r}
+beta_hat <- replicate(B <- 200, sample_logistic(n, beta, R))
 ```
 
 ```{r, echo = FALSE}
+par(mar = c(3,3,3,1), mgp = c(1.5, 0.5, 0))
 # plot fitted coefficients
-hist(beta_hat[1, ], main = expression(paste("Histogram of ",hat(beta)[p])),
-     xlab = "Estimated coefficients")
-abline(v = mean(beta_hat[1, ]), col = "red", lwd = 2)
-abline(v = 2, col = "black", lwd = 2)
+hist(beta_hat[1, ], breaks = 15, freq = FALSE, main = "", 
+     xlab = "Estimated coefficients", cex.lab = 1.5)
+mtext(expression(paste("Histogram of ",hat(beta)[p])), line = 1, cex = 1.5 )
+mtext(expression(paste(beta[p], "=4 (black line)")), line = 0)
+# theoretical density curve of beta_hat 
+lines(t <-  seq(-10, 25, by = 0.01), dnorm(t, 4 * 1.49, 5.37), col = "blue", lwd = 1.5)
+abline(v = 4, col = "black", lwd = 2)
 ```
 
-As we can see, the estimated $\hat{\beta}$ is not centered at the true value $\beta = 2$ (black line), but at some larger `r mean(beta_hat[1, ])` (red line). Further, the estimated standard error `r mean(beta_hat[2, ])` is smaller than the observed standard deviation `r sd(beta_hat[1, ])` from independent samples. 
+As we can see, the estimated $\hat{\beta}$ is not centered at the true value $\beta = 4$ (black line). The average $\hat{\beta}$ is at `r mean(beta_hat[1, ])`, which is larger. Further, the estimated standard error of $\hat{\beta}_p$ in one simulation is `r beta_hat[2, 1]`, which is smaller than the observed standard deviation `r sd(beta_hat[1, ])` from the independent samples. 
 
-The goal of this package is to estimate the inflation and standard deviation of the MLE more accurately than the classical theory. The procedure is based on the asymptotic distribution of the MLE when $n, p\to\infty$ at a fixed ratio $p / n\to \kappa \in (0, 1)$. Further, the theory requires the variables $X$ to be  multivariate Gaussian. Now let's load the library. 
+In general, as $n, p\to\infty$ at a fixed ratio $p / n\to \kappa \in (0, 1)$, and if the variables $X$ to be  multivariate Gaussian, the MLE of any coordinate $\beta_j$ satisfies 
+\[
+\frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
+\]
+where $\tau^2_j = \mathrm{Var}(x_j\,|\,x_{-j})$ is the conditional variance of $j$th variable given all the others (Zhao, 2020). These parameters $(\alpha_\star, \sigma_\star)$ can be computed given $\kappa = p/n$ and $\gamma = \sqrt{\mathrm{Var}(X^\top \beta)}$. In this example, 
+\[
+\kappa = 0.2, \quad \gamma = 2.18,
+\]
+and the corresponding $(\alpha_\star, \sigma_\star / \tau_p) = (1.49,5.37)$. We overlay the theoretical density curve of $\hat{\beta}_p$ in the above histogram (blue curve), which agree well with the obeserved histogram overall, except for a few large $\hat{\beta}_p$ in simulations. In reality, the parameter  $\gamma$ is typically unknown, so in the next section we will use `glmhd` package to estimate them. 
+
+#### Adjusting the MLE with glmhd
+
+The goal of `glmhd` package is to estimate the inflation and standard deviation of the MLE more accurately than the classical theory. We use the *ProbeFrontier* algorithm proposed in Sur (2019) to estimate the signal strength parameter $\gamma$, and then we estimate the inflation and standard deviation of the MLE. Now let's load the library. 
 
 ```{r setup}
 library(glmhd)
 ```
 
-Let's repeat the previous example and compute the MLE. Note here we specify `x = TRUE` and `y = TRUE` so the original data matrix is returned in `fit`. 
+We repeat the previous example and compute the MLE. Note that we specify `x = TRUE` and `y = TRUE` here so the original data matrix is returned in `fit`. 
 
 ```{r}
 # Same example as before
 X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
-beta <- rep(c(0, 2), each = p / 2)  
 Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
 fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
 ```
 
-Now we call the function `adjust_glm` to compute the adjusted MLE and standard error.  There are three arguments for this function, but you only need to input the first one, the output `glm` object. Below, the second argument and third arguments are set at their default values, `verbose` specifies if progress should be printed, and `echo = TRUE` means that the input `glm` object is also returned in the output. By default, `verbose = TRUE` because it helps to track progress of the code, and identify issues if the algorithm fails. 
+Now we call the function `adjust_glm` to compute the adjusted MLE and standard error. There are three arguments for this function, but you only need to input the first one, the output `glm` object. Below, the second argument and third arguments are set at their default values, `verbose` specifies if progress should be printed, and `echo = TRUE` means that the input `glm` object is also returned in the output. Setting`verbose = TRUE` helps to track progress of the code, and identify issues if the algorithm fails. 
 
 ```{r}
 adjusted_fit <- adjust_glm(fit, verbose = FALSE, echo = TRUE)
 ```
 
-We now show you how to access the estimated inflation factor, and how to find the adjusted MLE and their standard error for the last variable. You can compare the estimated inflation `r adjusted_fit$param["alpha_s"]` with the observed value `r mean(beta_hat[1, ]) / 2`. As $n, p \to\infty$, the MLE of any coordinate $\beta_j$ satisfies 
-\[
-\frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
-\]
-where $\tau^2_j = \mathrm{Var}(x_j\,|\,x_{-j})$ is the conditional variance of $j$th variable given all the others. `adjusted_fit$param["alpha_s"]` outputs estimated $\alpha_\star$ and `adjusted_fit$param["sigma_s"]` outputs estimated $\sqrt{\kappa}\sigma_\star$. The function computes an estimated standard error for each $\beta_j$, and the adjusted MLE satisfies
+You can access the estimated parameters through `adjusted_fit$param`. `adjusted_fit$param["alpha_s"]` outputs estimated $\alpha_\star$ and `adjusted_fit$param["sigma_s"]` outputs estimated $\sqrt{\kappa}\sigma_\star$. For example, you can compare the estimated inflation `r adjusted_fit$param["alpha_s"]` with the observed value `r mean(beta_hat[1, ]) / 4`.  
+
+```{r}
+adjusted_fit$param["alpha_s"] # Estimated inflation
+adjusted_fit$param["sigma_s"] / sqrt(p/n) # estimated sigma_star
+```
+
+You can obtain the adjusted MLE $\hat{\beta}^\mathrm{Adj}_p = \hat{\beta}_p^\mathrm{MLE} / \alpha_\star$ and the adjusted standard error estimate $\sigma_\star / \tau_j$ as follows.
+
+```{r}
+adjusted_fit$coef_adj[p] # Adjusted MLE
+adjusted_fit$std_adj[p] # Adjusted std. 
+```
+
+Next, `summary(adjusted_fit)` prints the coefficient table. The first column is the adjusted MLE, the second column is $\hat{\sigma}_j / \alpha_\star$, because the adjusted MLE satisfies
 \[
 \frac{\hat{\beta}_j^\mathrm{Adj} - \beta_j}{\hat{\sigma}_j / \alpha_\star} \approx \mathcal{N}(0, 1),
 \]
 for $\hat{\sigma}_j = \sigma_\star / \tau_j$ the adjusted std. estimate.
-
-```{r}
-# Estimated bias 
-adjusted_fit$param["alpha_s"]
-# Adjusted MLE
-adjusted_fit$coef_adj[p]
-# Adjusted std. 
-adjusted_fit$std_adj[p]
-```
-
-The function `summary` prints the coefficient table. 
 
 ```{r}
 print(summary(adjusted_fit), max = 40)
@@ -127,7 +149,7 @@ print(summary(adjusted_fit), max = 40)
 
 #### Hypothesis testing
 
-The `summary` function prints the adjusted MLE $\hat{\beta}^\mathrm{Adj}$ and its std. $\hat{\sigma} / \alpha_\star$, as well as a t-statistics $t = \hat{\beta}/\hat{\sigma}^\mathrm{MLE}$ and a P-value $\mathrm{P}(|\mathcal{N}(0,1)|\geq |t|)$. If the variables are multivariate Gaussian and the true model is logistic, then this p-value is from a Uniform[0,1] distribution under the null hypothesis that $\beta_j = 0$. 
+The `summary` function prints the adjusted MLE $\hat{\beta}^\mathrm{Adj}$ and its std. $\hat{\sigma} / \alpha_\star$, as well as a z-statistics $z = \hat{\beta}/\hat{\sigma}^\mathrm{MLE}$ and a P-value $\mathrm{P}(|\mathcal{N}(0,1)|\geq |z|)$. If the variables are multivariate Gaussian and the true model is logistic, then this p-value is from a Uniform[0,1] distribution under the null hypothesis that $\beta_j = 0$. 
 
 The following is a simulation to examine whether the calculated p-value is approximately uniform. For simplicity, we consider the first variable, which is a null, and the function is also included at the beginning. 
 
@@ -135,7 +157,7 @@ The following is a simulation to examine whether the calculated p-value is appro
 # pval_adj <- replicate(B <- 100, sample_logistic(n, p, R, adjust = TRUE))
 ```
 
-You can also use the likelihood ratio test (LRT) by calling the function `lrt_glm`. It requires two arguments, the first is a list of `glm` fits and the second is the `param` output from `adjust_glm`. It prints the likelihood ratio statistics and p-values computed according to the rescaled chi-squared distribution. Under the null hypothesis 
+You can use the likelihood ratio test (LRT) by calling the function `lrt_glm`. It requires two arguments, the first is a list of `glm` fits and the second is the `param` output from `adjust_glm`. It prints the likelihood ratio statistics and p-values computed according to the rescaled chi-squared distribution. Under the null hypothesis 
 \[
 H_0:\quad \beta_1 = \ldots = \beta_k = 0,
 \]
@@ -154,34 +176,75 @@ print(lrt)
 
 #### Model with an intercept 
 
-The previous example concerns a logistic model without an intercept, you can use the same function call for a model with an intercept. Here's the same example with an intercept term $\beta_0 = - 0.5$. This section is separated because the theory justification for this algorithm is still under study. 
+The previous example concerns a logistic model without an intercept, you can use the same function call for a model with an intercept. This is a separate section because the theory justification for this algorithm is still under study. The algorithm implemented in this package is based on the following conjecture: 
+\[
+\frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
+\]
+and the MLE of the intercept converges to some fixed quantity
+\[
+  \hat{\beta}_0 \stackrel{p}{\longrightarrow} b_\star.
+\]
+The adjusted MLE is $\hat{\beta}^\mathrm{Adj} = \hat{\beta} / \alpha_\star$ and adjusted std. is $\sigma_\star / \tau_j$.
+
+Consider an example where the intercept term $\beta_0 = - 0.5$. In this example, we can compute the $(\alpha_\star, \sigma_\star)$ (they depend on $\kappa = p/n$, $\gamma$ and true intercept $\beta_0$) and compare them with the estimates from independent samples. Notice that the input argument `beta_0` for `find_param` function is the absolute value of $\beta_0$. 
 
 ```{r}
-# Simulation setup
+gamma <- sqrt(sum((R %*% beta)^2/n)) # signal strength
+params <- find_param(kappa = p/n, gamma = gamma, beta0 = 0.5, verbose = FALSE)
+params[1] # true alpha_star
+params[3] / sqrt(p/n) # true sigma_star
+```
+
+```{r}
+sample_logistic_intercept <- function(n, beta, R){
+  p <- length(beta)
+  X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
+  Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta + 0.5)))
+  fit <- glm(Y ~ X, family = binomial)
+  # Returns the p-th fitted coefficient and its standard error
+  c(fit$coef[p+1], summary(fit)$coef[p+1, 2])
+}
+```
+
+```{r}
+beta_hat <- replicate(B, sample_logistic_intercept(n, beta, R))
+```
+
+```{r, echo = FALSE}
+par(mar = c(3,3,3,1), mgp = c(1.5, 0.5, 0))
+hist(beta_hat[1, ], breaks = 15, freq = FALSE, main = "", 
+     xlab = "Estimated coefficients", cex.lab = 1.5)
+mtext(expression(paste("Histogram of ",hat(beta)[p])), 
+      line = 1, cex = 1.5 )
+mtext(expression(paste(beta[p], "=4 (black line)")), 
+      line = 0)
+# theoretical density curve of beta_hat 
+lines(t <-  seq(-10, 25, by = 0.01), dnorm(t, 4 * 1.5, 5.47), col = "blue", lwd = 1.5)
+abline(v = 4, col = "black", lwd = 2)
+```
+
+The observed inflation in 200 samples is `r mean(beta_hat[1, ])/4` and observed standard deviation is `r sd(beta_hat[1, ])`. The theoretical density curve of $\hat{\beta}_p$ is shown in blue, and it agrees well with the histogram of $\hat{\beta}_p$. 
+
+You can use the same function `adjust_glm` to compute the adjusted MLE $\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}_j^\mathrm{MLE} / \alpha_\star$ and adjusted standard error $\sigma_\star / \tau_j$ without knowing the true parameters. 
+
+```{r}
 X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
-beta <- rep(c(0, 2), each = p / 2)
 Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta + 0.5)))
-# Fit a logistic regression
 fit <- glm(Y ~ X, family = binomial, x = TRUE, y = TRUE)
+```
+
+```{r}
 # Adjust MLE coefficients
 adjusted_fit <- adjust_glm(fit, verbose = FALSE)
 ```
 
-You can find the estimated intercept (not the MLE) as follows.
+`adjusted_fit$intercept` returns the estimated intercept, which you can compare with the MLE `r fit$coef[1]`. 
 
 ```{r}
 adjusted_fit$intercept
 ```
 
-You can also find the estimated bias and standard deviation as before. The asymptotic theory is similar to the previous case, where again
-\[
-  \frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
-  \]
-and further, the MLE of the intercept converges to some fixed quantity
-\[
-  \hat{\beta}_0 \stackrel{p}{\longrightarrow} b_\star.
-  \]
-The adjusted MLE is $\hat{\beta}^\mathrm{Adj} = \hat{\beta} / \alpha_\star$ and adjusted std. is $\sigma_\star / \tau_j$.
+You can also find the estimated bias and standard deviation like before. 
 
 ```{r}
 # Estimated inflation and std.
@@ -193,44 +256,11 @@ adjusted_fit$coef_adj[p]
 adjusted_fit$std_adj[p]
 ```
 
-In this example, we can compute the true parameters and compare them with the estimates. Notice that the input `beta_0` for `find_param` is the absolute value of the intercept $\beta_0$. 
-
-```{r}
-gamma <- sqrt(sum((R %*% beta)^2/n))
-params <- find_param(kappa = p/n, gamma = gamma, beta0 = 0.5, verbose = FALSE)
-params[1] # true alpha_star
-params[3] / sqrt(p/n) # true sigma_star
-```
-
-You can compare also these estimates from observations from repeated samples. The observed average of $\hat{\beta}^\mathrm{MLE}_p$ is shown in red line, and its true value is shown in black line.
-
-```{r}
-sample_logistic_intercept <- function(n, p, R){
-  X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
-  beta <- rep(c(0, 2), each =  p / 2)
-  Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta + 0.5)))
-  fit <- glm(Y ~ X, family = binomial, x = TRUE, y = TRUE)
-  # Returns the p-th fitted coefficient and its standard error
-  c(fit$coef[p+1], summary(fit)$coef[p+1, 2])
-}
-```
-
-```{r}
-beta_hat <- replicate(B, sample_logistic_intercept(n, p, R))
-```
-
-```{r, echo = FALSE}
-# plot fitted coefficients
-hist(beta_hat[1, ],
-     main = expression(paste("Histogram of ",hat(beta)[p])),
-     xlab = "Estimated coefficients")
-abline(v = mean(beta_hat[1, ]), col = "red", lwd = 2)
-abline(v = 2, col = "black", lwd = 2)
-```
-
-The observed inflation is `r mean(beta_hat[1, ])/2` and observed standard deviation is `r sd(beta_hat[1, ])`.
-
 #### Other link functions
 
-If you are working with a probit model, you can use the `glm` function with `family = binomial(link = "probit")`, and use the `glm` object as input to `adjust_glm` function. It automatically identifies the link function from the `family` object. 
+If you are working with a probit model, you can use the `glm` function with `family = binomial(link = "probit")`, and use the `glm` object as input to `adjust_glm` It automatically identifies the link function from the `family` object. 
 
+#### Reference 
+*A modern maximum-likelihood theory for high-dimensional logistic regression*, Pragya Sur and Emmanuel J. Candes, Proceedings of the National Academy of Sciences Jul 2019, 116 (29) 14516-14525
+
+*The Asymptotic Distribution of the MLE in High-dimensional Logistic Models: Arbitrary Covariance*, Qian Zhao, Pragya Sur and Emmanuel J. Candes, arXiv:2001.09351
