@@ -196,15 +196,15 @@ used to fit the <code>glm</code>. If there's no new data, it outputs the estimat
 <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>adjusted_fit</span>), <span class='kw'>max</span> <span class='kw'>=</span> <span class='fl'>40</span>)</div><div class='output co'>#&gt; Call:
 #&gt; adjust_glm(glm_output = fit)
 #&gt; 
-#&gt;      adjusted_mle adjusted_std t.value   p.value    
-#&gt; X1     -0.0191088    0.0958177 -0.1994 0.8419275    
-#&gt; X2      0.2634231    0.0996318  2.6440 0.0081941 ** 
-#&gt; X3      0.1436590    0.0943073  1.5233 0.1276819    
-#&gt; X4      0.2569481    0.0940849  2.7310 0.0063138 ** 
-#&gt; X5     -0.1776332    0.0931093 -1.9078 0.0564179 .  
-#&gt; X6      0.2309281    0.0953822  2.4211 0.0154744 *  
-#&gt; X7      0.1740878    0.0949737  1.8330 0.0668012 .  
-#&gt; X8      0.1010892    0.0996689  1.0143 0.3104632    
+#&gt;      adjusted_mle        std z.value   p.value    
+#&gt; X1     -0.0191088  0.0958177 -0.1994 0.8419275    
+#&gt; X2      0.2634231  0.0996318  2.6440 0.0081941 ** 
+#&gt; X3      0.1436590  0.0943073  1.5233 0.1276819    
+#&gt; X4      0.2569481  0.0940849  2.7310 0.0063138 ** 
+#&gt; X5     -0.1776332  0.0931093 -1.9078 0.0564179 .  
+#&gt; X6      0.2309281  0.0953822  2.4211 0.0154744 *  
+#&gt; X7      0.1740878  0.0949737  1.8330 0.0668012 .  
+#&gt; X8      0.1010892  0.0996689  1.0143 0.3104632    
 #&gt;  [ reached getOption("max.print") -- omitted 292 rows ]
 #&gt; ---
 #&gt; Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</div><div class='input'><span class='co'># Predict on new data</span>

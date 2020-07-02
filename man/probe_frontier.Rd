@@ -42,3 +42,8 @@ X <- matrix(rnorm(n*p, 0, 1), n, p)
 Y <- 2 * rbinom(n, 1, 0.5) - 1
 probe_frontier(X, Y, verbose = TRUE)
 }
+\references{
+\emph{A modern maximum-likelihood theory for high-dimensional logistic regression},
+Pragya Sur and Emmanuel J. Candes,
+Proceedings of the National Academy of Sciences Jul 2019, 116 (29) 14516-14525
+}
