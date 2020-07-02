@@ -31,8 +31,8 @@ summary.glmadj <- function(object, ...){
   se <- object$std_adj / object$param["alpha_s"]
   tval <- object$coef_adj / se
   TAB <- cbind(adjusted_mle = object$coef_adj,
-               adjusted_std = se,
-               t.value = tval,
+               std = se,
+               z.value = tval,
                p.value = 2 * pnorm(-abs(tval)))
   result <- list(call=object$call,
                  coefficients=TAB)
