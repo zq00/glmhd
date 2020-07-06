@@ -29,6 +29,10 @@ Note that the vignette takes about 20 min to knit, so feel free to download the 
 
 You can find the function documentations under the [Reference](https://zq00.github.io/glmhd/reference/index.html) tab. To get started, you can take a look at the function `adjust_glm`, which computes the adjusted coefficient and standard error estimates.
 
+## Source code
+
+The source code is located at the [Github -> R](https://github.com/zq00/glmhd/tree/master/R) folder. 
+
 ## Feedback
 
 If you encounter error or would like to provide feedback, please use [Github -> Issues](https://github.com/zq00/glmhd/issues) to reach us. Thank you! 
