@@ -6,7 +6,8 @@ This R package estimates the bias and variance of the MLE from a high-dimensiona
 
 ## Getting started
 
-The package vignette is under the Articles tab at this [link](https://zq00.github.io/glmhd/articles/my-vignette.html). You can read more about the theory of high dimensional logistic MLE, and the methods used in the package [here](https://arxiv.org/abs/2001.09351).  
+- You can find the package **vignette** under the Articles tab (https://zq00.github.io/glmhd/articles/my-vignette.html). 
+- You can read more about the theory of high dimensional logistic MLE, and the methods used in the package [here](https://arxiv.org/abs/2001.09351).  
 
 ## Installation
 
