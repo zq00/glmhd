@@ -88,21 +88,37 @@ lines(t <-  seq(-10, 25, by = 0.01), dnorm(t, 4 * 1.49, 5.37), col = "blue", lwd
 abline(v = 4, col = "black", lwd = 2)
 ```
 
-As we can see, the estimated $\hat{\beta}$ is not centered at the true value $\beta = 4$ (black line). The average $\hat{\beta}$ is at `r mean(beta_hat[1, ])`, which is larger. Further, the estimated standard error of $\hat{\beta}_p$ in one simulation is `r beta_hat[2, 1]`, which is smaller than the observed standard deviation `r sd(beta_hat[1, ])` from the independent samples. 
+```{r, eval = TRUE, echo = FALSE}
+X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
+Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
+fit <- glm(Y ~ X + 0, family = binomial)
+```
+
+As we can see, the estimated $\hat{\beta}$ is not centered at the true value $\beta = 4$ (black line). The average $\hat{\beta}$ is at `r mean(beta_hat[1, ])`, which is larger. If we look at a single simulation below, the estimated standard error of $\hat{\beta}_p$ is `r summary(fit)$coef[p,2]`, which is smaller than the observed standard deviation `r sd(beta_hat[1, ])` from the independent samples. 
+
+```{r, eval = FALSE, echo = TRUE}
+X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
+Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
+fit <- glm(Y ~ X + 0, family = binomial)
+```
+
+```{r, eval = TRUE, echo = TRUE}
+summary(fit)$coef[p,2] # estimated std. from inverse Fisher information
+```
 
 In general, as $n, p\to\infty$ at a fixed ratio $p / n\to \kappa \in (0, 1)$, and if the variables $X$ to be  multivariate Gaussian, the MLE of any coordinate $\beta_j$ satisfies 
 \[
 \frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
 \]
-where $\tau^2_j = \mathrm{Var}(x_j\,|\,x_{-j})$ is the conditional variance of $j$th variable given all the others (Zhao, 2020). These parameters $(\alpha_\star, \sigma_\star)$ can be computed given $\kappa = p/n$ and $\gamma = \sqrt{\mathrm{Var}(X^\top \beta)}$. In this example, 
+where $\tau^2_j = \mathrm{Var}(x_j\,|\,x_{-j})$ is the conditional variance of $j$th variable given all the others [1]. These parameters $(\alpha_\star, \sigma_\star)$ can be computed given $\kappa = p/n$ and $\gamma = \sqrt{\mathrm{Var}(X^\top \beta)}$. In this example, 
 \[
 \kappa = 0.2, \quad \gamma = 2.18,
 \]
-and the corresponding $(\alpha_\star, \sigma_\star / \tau_p) = (1.49,5.37)$. We overlay the theoretical density curve of $\hat{\beta}_p$ in the above histogram (blue curve), which agree well with the obeserved histogram overall, except for a few large $\hat{\beta}_p$ in simulations. In reality, the parameter  $\gamma$ is typically unknown, so in the next section we will use `glmhd` package to estimate them. 
+and the corresponding $(\alpha_\star, \sigma_\star / \tau_p) = (1.49,5.37)$. We overlay the theoretical density curve of $\hat{\beta}_p$ in the above histogram (blue curve), which agree well with the obeserved histogram overall, except for a few large $\hat{\beta}_p$ in simulations. In reality, the parameter  $\gamma$ is typically unknown, so in the next section we will use `glmhd` package to estimate it. 
 
 #### Adjusting the MLE with glmhd
 
-The goal of `glmhd` package is to estimate the inflation and standard deviation of the MLE more accurately than the classical theory. We use the *ProbeFrontier* algorithm proposed in Sur (2019) to estimate the signal strength parameter $\gamma$, and then we estimate the inflation and standard deviation of the MLE. Now let's load the library. 
+The goal of `glmhd` package is to estimate the inflation and standard deviation of the MLE more accurately than the classical theory. We use the *ProbeFrontier* algorithm [2] to estimate the signal strength parameter $\gamma$, and then we estimate the inflation and standard deviation of the MLE. Now let's load the library. 
 
 ```{r setup}
 library(glmhd)
@@ -111,9 +127,7 @@ library(glmhd)
 We repeat the previous example and compute the MLE. Note that we specify `x = TRUE` and `y = TRUE` here so the original data matrix is returned in `fit`. 
 
 ```{r}
-# Same example as before
-X <- matrix(rnorm(n * p, 0, 1), n, p) %*% R / sqrt(n)
-Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
+# fit the MLE again  
 fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
 ```
 
@@ -260,7 +274,7 @@ adjusted_fit$std_adj[p]
 
 If you are working with a probit model, you can use the `glm` function with `family = binomial(link = "probit")`, and use the `glm` object as input to `adjust_glm` It automatically identifies the link function from the `family` object. 
 
-#### Reference 
-*A modern maximum-likelihood theory for high-dimensional logistic regression*, Pragya Sur and Emmanuel J. Candes, Proceedings of the National Academy of Sciences Jul 2019, 116 (29) 14516-14525
+#### References 
+[1] *A modern maximum-likelihood theory for high-dimensional logistic regression*, Pragya Sur and Emmanuel J. Candes, Proceedings of the National Academy of Sciences Jul 2019, 116 (29) 14516-14525
 
-*The Asymptotic Distribution of the MLE in High-dimensional Logistic Models: Arbitrary Covariance*, Qian Zhao, Pragya Sur and Emmanuel J. Candes, arXiv:2001.09351
+[2] *The Asymptotic Distribution of the MLE in High-dimensional Logistic Models: Arbitrary Covariance*, Qian Zhao, Pragya Sur and Emmanuel J. Candes, arXiv:2001.09351
