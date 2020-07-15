@@ -23,8 +23,6 @@ A numeric value
 One-dimensional proximal operator
 }
 \examples{
-\dontrun{
 f <- function(x) 1/(1+exp(-x))
 prox_op(f, 1, 1)
-}
 }

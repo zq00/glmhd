@@ -10,6 +10,7 @@
 #' the derivative of the negative log-likelihood when \eqn{Y=1} and \eqn{Y=-1}.
 #'
 #' @param x Numeric. Input variable.
+#' @export
 
 rho_prime_logistic <- function(x) 1 / (1 + exp(-x))
 

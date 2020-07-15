@@ -8,11 +8,10 @@
 #'     It solves the equation
 #'     \deqn{f'(z) + \frac{1}{\lambda}(z-x) = 0.}
 #' @importFrom stats uniroot
+#' @export
 #' @examples
-#' \dontrun{
 #' f <- function(x) 1/(1+exp(-x))
 #' prox_op(f, 1, 1)
-#' }
 
 prox_op <- function(f_prime, lambda, x){
   f <- function(z)  z + lambda * f_prime(z) - x
