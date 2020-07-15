@@ -15,9 +15,11 @@
 rho_prime_logistic <- function(x) 1 / (1 + exp(-x))
 
 #' @rdname rho_prime_logistic
+#' @export
 f_prime1_logistic <- function(x) -1 / (1 + exp(x))
 
 #' @rdname rho_prime_logistic
+#' @export
 f_prime0_logistic <- function(x) 1 / (1 + exp(-x))
 
 
