@@ -15,7 +15,7 @@
 #'
 #' @keywords internal
 #' @importFrom ECOSolveR ECOS_csolve
-#'
+#' @export
 #' @seealso \link[safeBinaryRegression]{glm}
 #' @references
 #' \emph{The phase transition for the existence of the maximum likelihood estimate in high-dimensional logistic regression}
