@@ -69,10 +69,15 @@ signal_strength <- function(rho_prime = rho_prime_logistic,
   }
   # Search interval
   l <- 0
+  # pick the upper bound
   u <- solve_beta(rho_prime, kappa_hat, gamma0 = 0, verbose = FALSE)
+  if(u > beta_hat){
+    error("Fitted intercept is larger than threshold.")
+  }
   if(verbose) cat("Search intercept beta0 in an interval:\n")
   f <- function(beta_hat){
     gamma_hat <- solve_gamma(rho_prime, kappa_hat, beta_hat)
+    if(gamma_hat < 0.001) gamma_hat <- 0
     param_new <- find_param(rho_prime, f_prime1, f_prime0,
                             kappa = kappa, gamma = gamma_hat,
                             beta0 = beta_hat, verbose = FALSE)
