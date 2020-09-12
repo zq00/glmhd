@@ -64,7 +64,10 @@ probe_frontier <- function(X, Y, B = 10, eps = 0.001, verbose = FALSE){
   if(verbose) cat("------- \n")
   if(kappa_s > 0.5) {
     return(0.5)
-  }else{
+  }else if(kappa_s < 0){
+    cat("separable")
+    return(0)
+  } else{
     return(kappa_s)
   }
 }
