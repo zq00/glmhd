@@ -15,7 +15,7 @@
 #'
 #' @keywords internal
 #' @importFrom ECOSolveR ECOS_csolve
-#' @importFrom Matrix rankMarix
+#' @importFrom Matrix rankMatrix
 #' @export
 #' @seealso \link[safeBinaryRegression]{glm}
 #' @references
