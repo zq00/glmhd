@@ -15,6 +15,7 @@
 #'
 #' @keywords internal
 #' @importFrom ECOSolveR ECOS_csolve
+#' @importFrom Matrix rankMarix
 #' @export
 #' @seealso \link[safeBinaryRegression]{glm}
 #' @references
@@ -38,6 +39,9 @@ is_separable <- function(X, Y, add_intercept = FALSE){
   }else{
     Z <- - X * Y
   }
+
+  if(rankMatrix(Z, method = "qrLINPACK")[1] < p) return(1)
+
   zbar <- colMeans(Z)
   # Is 0 solution to the LP?
   c <-rep(0, n)
