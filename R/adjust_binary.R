@@ -81,7 +81,7 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
     return(0)
   }
   # Problem dimension that data becomes separable
-  kappa_hat <- probe_frontier(X, Y, verbose = verbose)
+  kappa_hat <- probe_frontier(X, Y, verbose = verbose, ...)
 
   # Estimate signal strength
   signal_strength <- signal_strength(rho_prime = link_fun$rho_prime,
