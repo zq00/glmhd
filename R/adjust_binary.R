@@ -118,7 +118,7 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
     std_adj <- param["sigma_s"] / sqrt(p) / tau_hat
     return(
       list(
-        glm_output = ifelse(echo, glm_output, NULL),
+        glm_output = ifelse(echo, glm_output, NA),
         param = param,
         gamma_hat = signal_strength$gamma_hat,
         intercept = signal_strength$beta_hat * sign(glm_output$coef[1]),
@@ -137,7 +137,7 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
     std_adj <- param["sigma_s"] / sqrt(p) / tau_hat
     return(
       list(
-        glm_output = ifelse(echo, glm_output, NULL),
+        glm_output = ifelse(echo, glm_output, NA),
         gamma_hat = signal_strength$gamma_hat,
         param = param,
         intercept = NULL,
