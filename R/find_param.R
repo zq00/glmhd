@@ -20,8 +20,8 @@
 #' @return A vector solution to the system. When \code{gamma != 0} and \code{b !=0},
 #'     returns \eqn{(\alpha_\star, \lambda_\star, \sqrt{\kappa}\sigma_\star, b_\star)}.
 #'     When signal strength is zero (\code{gamma = 0}), returns the solution to the system with
-#'     three equations \eqn{(\lambda_\star, \sqrt{\kappa}\sigma_\star, b_\star)}. When \code{gamma = 0} and
-#'     \code{b = 0}, returns \eqn{(\lambda_\star, \sqrt{\kappa}\sigma_\star)}.
+#'     three equations \eqn{(\alpha_\star = 0, \lambda_\star, \sqrt{\kappa}\sigma_\star, b_\star)}. When \code{gamma = 0} and
+#'     \code{b = 0}, returns \eqn{(\alpha_\star = 0, \lambda_\star, \sqrt{\kappa}\sigma_\star)}.
 #' @importFrom pracma fsolve
 #' @include equation_binary.R prox_op.R integrate2_normal.R logistic_model.R
 #' @references
