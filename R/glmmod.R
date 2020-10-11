@@ -54,7 +54,7 @@
 #' @export
 adjust_glm <- function(glm_output, verbose = FALSE, echo = TRUE, ...){
   if(glm_output$family$family == "binomial"){
-    mle_adj <- adjust_binary(glm_output, verbose, echo)
+    mle_adj <- adjust_binary(glm_output, verbose, echo, ...)
     # Fitted value is the linear part, i.e. eta
     if(!is.null(mle_adj$intercept)){
       mle_adj$fitted.values <- as.vector(mle_adj$intercept +
