@@ -1,6 +1,6 @@
 #' Adjust the MLE in a binary regression
 #'
-#' This function computes the asymptotic bias and variance of the MLE of a binary regression
+#' This function computes the asymptotic inflation and variance of the MLE of a binary regression
 #' when both \eqn{n} and \eqn{p} are large,
 #' assuming that covariates \eqn{X} are multivariate Gaussian.
 #'
@@ -13,6 +13,11 @@
 #' where \eqn{\tau_j^2} is the conditional variance of \eqn{x_j} given all the other variables.
 #' This implies \eqn{\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}^{MLE}_j / \alpha_\star} is unbiased for the coefficient \eqn{\beta_j}.
 #' \code{adjust_binary} computes \eqn{\hat{\beta}_j^\mathrm{Adj}} and returns it in the vector \code{coef_adj}.
+#' @section Additional arguments:
+#' \describe{
+#'     \item{B}{Number of repetitions at each \code{kappa} in \emph{ProbeFrontier} algorithm.}
+#'     \item{tol}{\code{tol} parameter when solving for signal strength and intercept. see \code{signal_strength}.}
+#' }
 #'
 #' @section Notes:
 #' \itemize{
@@ -20,7 +25,7 @@
 #'   \item The input to this function should be an object from the class \code{glm},
 #'   and it should include \code{family} specifying the link function. Currently, the algorithm
 #'   can handle logit and probit link.
-#'   \item if gamma<0.0001, set gamma = 0
+#'   \item if estimated \eqn{\hat{\gamma}<0.0001}, we set \eqn{\gamma=0}.
 #' }
 #'
 #' @param glm_output An object from the class \code{glm},
@@ -32,13 +37,14 @@
 #' \describe{
 #' \item{glm_output}{If \code{echo = TRUE}, returns the input \code{glm_output}.}
 #' \item{gamma_hat}{Estimated signal strength \eqn{\gamma_0}.}
-#' \item{param}{Estimated paramters \eqn{(\alpha_\star, \lambda_\star, \sigma_\star, b_\star)}}
+#' \item{param}{Estimated paramters \eqn{(\alpha_\star, \lambda_\star, \sigma_\star, b_\star)}.
+#'    If the model does not contain an intercept, returns \eqn{(\alpha_\star, \lambda_\star, \sigma_\star)}.}
 #' \item{intercept}{Does the model contain an intercept?}
-#' \item{tau_hat}{Estimated conditional standard deviation}
+#' \item{tau_hat}{Estimated conditional standard deviation.}
 #' \item{coef_adj}{Adjusted MLE: this is \eqn{\hat{\beta}^{\mathrm{MLE}} / \alpha_\star}.}
 #' \item{std_adj}{Estimated standard error of \eqn{\hat{\beta}_j}: \eqn{\sigma_\star / \tau_j}.}
 #' \item{coef_unadj}{Unadjusted MLE.}
-#' \item{std_unadj}{Unadjusted standard error. This is output from the \code{\link[stats]{glm}}.}
+#' \item{std_unadj}{Unadjusted standard error. This is output from the \code{\link[stats]{glm}} function.}
 #' }
 #' @include is_separable.R probe_frontier.R separable_proportion.R logistic_model.R
 #'     integrate2_normal.R signal_strength.R prox_op.R find_param.R
@@ -47,7 +53,6 @@
 #' @references
 #' \emph{The Asymptotic Distribution of the MLE in High-dimensional Logistic Models: Arbitrary Covariance}, Qian Zhao, Pragya Sur and Emmanuel J. Candes, arXiv:2001.09351
 #' @examples
-#' \dontrun{
 #' # Problem size
 #' n <- 1000L
 #' p <- 300L
@@ -61,7 +66,6 @@
 #' adjusted_fit <- adjust_binary(fit)
 #' # Adjusted MLE
 #' head(adjusted_fit$coef_unadj)
-#' }
 #' @export
 adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
   # extract model matrix
@@ -84,7 +88,7 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
   p0 <- mean((Y+1)/2)
   signal_strength <- signal_strength(rho_prime = link_fun$rho_prime,
                                      kappa_hat,
-                                     has_intercept, p0, verbose)
+                                     has_intercept, p0, verbose, ...)
   # calculate parameters based on (kappa, gamma_hat)
   gamma_hat <- ifelse(signal_strength$gamma_hat > 1e-4, signal_strength$gamma_hat, 0)
   param <- find_param(

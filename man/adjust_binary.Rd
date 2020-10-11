@@ -21,17 +21,18 @@ A list with elements
 \describe{
 \item{glm_output}{If \code{echo = TRUE}, returns the input \code{glm_output}.}
 \item{gamma_hat}{Estimated signal strength \eqn{\gamma_0}.}
-\item{param}{Estimated paramters \eqn{(\alpha_\star, \lambda_\star, \sigma_\star, b_\star)}}
+\item{param}{Estimated paramters \eqn{(\alpha_\star, \lambda_\star, \sigma_\star, b_\star)}.
+   If the model does not contain an intercept, returns \eqn{(\alpha_\star, \lambda_\star, \sigma_\star)}.}
 \item{intercept}{Does the model contain an intercept?}
-\item{tau_hat}{Estimated conditional standard deviation}
+\item{tau_hat}{Estimated conditional standard deviation.}
 \item{coef_adj}{Adjusted MLE: this is \eqn{\hat{\beta}^{\mathrm{MLE}} / \alpha_\star}.}
 \item{std_adj}{Estimated standard error of \eqn{\hat{\beta}_j}: \eqn{\sigma_\star / \tau_j}.}
 \item{coef_unadj}{Unadjusted MLE.}
-\item{std_unadj}{Unadjusted standard error. This is output from the \code{\link[stats]{glm}}.}
+\item{std_unadj}{Unadjusted standard error. This is output from the \code{\link[stats]{glm}} function.}
 }
 }
 \description{
-This function computes the asymptotic bias and variance of the MLE of a binary regression
+This function computes the asymptotic inflation and variance of the MLE of a binary regression
 when both \eqn{n} and \eqn{p} are large,
 assuming that covariates \eqn{X} are multivariate Gaussian.
 }
@@ -46,6 +47,14 @@ where \eqn{\tau_j^2} is the conditional variance of \eqn{x_j} given all the othe
 This implies \eqn{\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}^{MLE}_j / \alpha_\star} is unbiased for the coefficient \eqn{\beta_j}.
 \code{adjust_binary} computes \eqn{\hat{\beta}_j^\mathrm{Adj}} and returns it in the vector \code{coef_adj}.
 }
+\section{Additional arguments}{
+
+\describe{
+    \item{B}{Number of repetitions at each \code{kappa} in \emph{ProbeFrontier} algorithm.}
+    \item{tol}{\code{tol} parameter when solving for signal strength and intercept. see \code{signal_strength}.}
+}
+}
+
 \section{Notes}{
 
 \itemize{
@@ -53,11 +62,11 @@ This implies \eqn{\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}^{MLE}_j / \alpha_\sta
   \item The input to this function should be an object from the class \code{glm},
   and it should include \code{family} specifying the link function. Currently, the algorithm
   can handle logit and probit link.
+  \item if estimated \eqn{\hat{\gamma}<0.0001}, we set \eqn{\gamma=0}.
 }
 }
 
 \examples{
-\dontrun{
 # Problem size
 n <- 1000L
 p <- 300L
@@ -71,7 +80,6 @@ fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
 adjusted_fit <- adjust_binary(fit)
 # Adjusted MLE
 head(adjusted_fit$coef_unadj)
-}
 }
 \references{
 \emph{The Asymptotic Distribution of the MLE in High-dimensional Logistic Models: Arbitrary Covariance}, Qian Zhao, Pragya Sur and Emmanuel J. Candes, arXiv:2001.09351
