@@ -1,43 +1,42 @@
-#' Estimate problem parameters
+#' Estimate intercept and signal strength
 #'
-#' This function estimates \eqn{(\beta_0, \gamma_0)} using the estimated \eqn{\kappa_s}
-#' and intercept \eqn{b}.
+#' \code{signal_strength} estimates \eqn{(\beta_0, \gamma)} using the estimated \eqn{\kappa_s}
+#' and observed proportion of successes.
 #'
 #' Assume that \eqn{Y} depends on \eqn{X} as
 #' \deqn{
 #' \mathrm{P}(Y=1\,|\,X) = \rho'(X^\top \beta + \beta_0),
 #' }
 #' and let the signal strength be \eqn{\gamma = \mathrm{Var}(X^\top \beta)^{1/2}}.
-#' The pair \eqn{(\beta_0, \gamma_0)} satisfies
+#' The pair \eqn{(\beta_0, \gamma)} satisfies
 #' \itemize{
-#' \item They are on the phase transition curve \eqn{\kappa(\beta_0, \gamma_0)}.
-#'     We estimate the dimension \eqn{\kappa(\beta_0, \gamma_0)} in \code{\link{probe_frontier}}.
-#' \item The set of parameters \eqn{(\kappa, \beta_0, \gamma_0)} determines the asymptotic
-#'     an estimated intercept \eqn{b}, which should be close to the MLE \code{b_hat}.
+#' \item They are on the phase transition curve \eqn{\kappa(\beta_0, \gamma)}.
+#'     \deqn{
+#'     \hat{\kappa} \approx \kappa(\beta_0, \gamma)
+#'      }
+#' \item The observed proportion of \eqn{Y=1} should be close to the expected proportion.
+#'     \deqn{
+#'     p_0 \approx \prob(Y = 1\,|\, \beta_0, \gamma) = \mathrm{E}{\mathrm{Ber}(\rho'(\beta_0 + \gamma Z)}
+#'     }
+#'    where \eqn{Z} is a standard normal variable.
 #' }
-#' We use bisection to search for \eqn{\beta_0}, for each \eqn{\beta_0} we compute \eqn{\gamma_0}
-#' on the phase transition curve, and compare the corresponding \eqn{b} with the
-#' MLE \code{b_hat}. The algorithm terminates when search window is smaller than \code{eps}.
+#' We solve the above system of two equations to obtain an estimate of \eqn{(\beta_0, \gamma)}
 #'
+#' @importFrom pracma fsolve
 #' @include prox_op.R h_eq.R find_param.R
 #' @param rho_prime A function that computes the success probability \eqn{\rho'(t) = \mathrm{P}(Y=1 | X^\top \beta = t)},
 #'     here \eqn{\beta} is the coefficient. The default is logistic model.
-#' @param f_prime1 A function. Derivative of the loss function when \eqn{Y = 1}.
-#'     The default is the derivative of the negative log-likelihood of logistic
-#'     regression when \eqn{Y = 1}.
-#' @param f_prime0 A function. Derivative of the loss function when \eqn{Y = -1}.
-#'     The default is the derivative of the negative log-likelihood of logistic
-#'     regression when \eqn{Y = -1}.
 #' @param kappa_hat Numeric. Estimated dimension where the data becomes linearly separable
-#' @param kappa Numeric. Problem dimension \eqn{\kappa = p/n}.
-#' @param intercept \code{TRUE} if the model contains an intercept.
-#' @param b_hat Numeric. MLE of the intercept.
+#' @param intercept Logical \code{TRUE} if the model contains an intercept.
+#' @param p0 Numeric. Proportion of outcomes \eqn{Y=1}.
 #' @param verbose Should progress be printed? If \code{TRUE}, prints progress at each step.
-#' @param eps Numeric. Terminate the algorithm if the search interval is smaller than \code{eps}.
-#' @return A list of two components
+#' @param tol Numeric. Tolerance to be used in \code{fsolve} function.
+#'
+#' @return If the model does not contain an intercept, returns estimated \code{gamma_hat}.
+#'     Otherwise, returns a list with two components
 #' \describe{
-#'   \item{gamma_hat}{Estimated signal strength}
-#'   \item{beta_hat}{Estimated intercept. \code{NULL} if the model does not have an intercept term}
+#'   \item{gamma_hat}{Estimated signal strength.}
+#'   \item{b_hat}{Estimated intercept.}
 #' }
 #' @examples
 #' \dontrun{
@@ -45,12 +44,11 @@
 #' # should return 0, returns 0.0127
 #' signal <- signal_strength(kappa_hat = 0.5, intercept = FALSE)
 #' signal$gamma_hat
-#' signal$b_hat
 #' }
 signal_strength <- function(rho_prime = rho_prime_logistic,
                             kappa_hat,
                             intercept = FALSE,
-                            p0 = NULL,
+                            p0 = NA,
                             verbose = FALSE,
                             tol = 1e-4){
   if(verbose) cat("-- Finding signal strength and the intercept -- \n ")
