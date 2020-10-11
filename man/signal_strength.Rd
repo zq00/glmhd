@@ -65,6 +65,5 @@ We solve the above system of two equations to obtain an estimate of \eqn{(\beta_
 # should return 0, returns 0.0127
 signal <- signal_strength(kappa_hat = 0.5, intercept = FALSE)
 signal$gamma_hat
-signal$b_hat
 }
 }

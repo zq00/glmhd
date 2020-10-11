@@ -21,7 +21,7 @@ negative log-likelihood of a logistic model
 }
 \details{
 \code{rho_prime_logistic} computes the successs probability of
-a logistic model \eqn{\rho(t) = 1/(1+e^{-t})}.
+a logistic model \eqn{\rho'(t) = 1/(1+e^{-t})}.
 
 \code{f_prime1_logistic} and \code{f_prime0_logistic} are
 the derivative of the negative log-likelihood when \eqn{Y=1} and \eqn{Y=-1}.
