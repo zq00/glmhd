@@ -48,59 +48,35 @@
 #' signal$b_hat
 #' }
 signal_strength <- function(rho_prime = rho_prime_logistic,
-                            f_prime1 = f_prime1_logistic,
-                            f_prime0 = f_prime0_logistic,
                             kappa_hat,
-                            kappa = NULL,
-                            intercept,
-                            b_hat = NULL,
+                            intercept = FALSE,
+                            p0 = NULL,
                             verbose = FALSE,
-                            eps = 0.1){
-  if(verbose) cat("------ Finding signal strength and the intercept ------ \n ")
+                            tol = 1e-4){
+  if(verbose) cat("-- Finding signal strength and the intercept -- \n ")
   if(!intercept){ # no intercept in model
-    gamma_hat <- solve_gamma(rho_prime, kappa_hat, 0, FALSE)
+    gamma_hat <- solve_gamma(rho_prime, kappa_hat, beta0 = 0, verbose = FALSE)
+    if(verbose) { cat("No intercept, estimated signal strength gamma_hat = ", gamma_hat, "\n ---- \n")}
+    return(list(gamma_hat = gamma_hat))
+  }
+  # expected proportion of Y= 1
+  prop <- function(beta0, gamma){
+    f <- function(z){dnorm(z) * rho_prime(beta0 + gamma * z)}
+    integrate(f, -8, 8, abs.tol = 1e-5)$value
+  }
+  # a system of two equations
+  f <- function(x){
+    beta0 <- x[1]; gamma <- x[2]
+    val <- c(kappa_hat - solve_kappa(rho_prime = rho_prime, abs(beta0), gamma),
+             p0 - prop(beta0, gamma))
+  }
+  # initial values
+  x_init <- c(log(p0 / (1-p0)), 2)
+  sol <- fsolve(f, x_init, J = NULL, maxiter = 100, tol = tol)$x
 
-    if(verbose) {
-      cat("No intercept, estimated signal strength gamma_hat = ", gamma_hat, "\n")
-      cat("------ \n")
-    }
-    return(list(gamma_hat = gamma_hat,
-           b_hat = NULL))
-  }
-  # Search interval
-  l <- 0
-  # pick the upper bound
-  u <- solve_beta(rho_prime, kappa_hat, gamma0 = 0, verbose = FALSE)
-  if(u < abs(b_hat)){
-    cat("Fitted intercept is larger than threshold.\n")
-    return(
-      list(
-        gamma_hat = 0,
-        beta_hat = u
-      )
-    )
-  }
-  if(verbose) cat("Search intercept beta0 in an interval:\n")
-  f <- function(beta_hat){
-    gamma_hat <- solve_gamma(rho_prime, kappa_hat, beta_hat)
-    if(gamma_hat < 0.001) gamma_hat <- 0
-    param_new <- find_param(rho_prime, f_prime1, f_prime0,
-                            kappa = kappa, gamma = gamma_hat,
-                            beta0 = beta_hat, verbose = FALSE)
-    # val <- sqrt((sqrt(param_new[1]^2 * gamma_hat^2 + param_new[3]^2) - a_hat)^2 + (param_new[4] - b_hat)^2)
-    ifelse(gamma_hat == 0, param_new[3] - b_hat, param_new[4] - b_hat)
-  }
-  beta_hat <- binary_solve(f, interval = c(l, u), eps = eps, verbose = verbose)
-  gamma_hat <- solve_gamma(rho_prime, kappa_hat, beta_hat)
-  if(verbose){
-    cat("Estimated signal strength gamma_hat = ", gamma_hat, ", intercept beta_0 = ", beta_hat, "\n")
-    cat("------ \n")
-  }
+  if(verbose){cat("Estimated signal strength gamma_hat = ", sol[2], ", intercept beta_0 = ", sol[1], "\n ---- \n")}
 
-  list(
-    gamma_hat = gamma_hat,
-    beta_hat = beta_hat
-  )
+  list(b_hat = sol[1],gamma_hat = sol[2])
 }
 
 
