@@ -2,7 +2,7 @@
 
 ## Overview
 
-This R package estimates the bias and variance of the MLE from a high-dimensional binary regression model. 
+This R package estimates the inflation and variance of the MLE from a high-dimensional binary regression model. 
 
 ## Getting started
 
