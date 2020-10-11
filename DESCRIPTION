@@ -1,5 +1,5 @@
 Package: glmhd
-Title: Estimates the bias and variance of the MLE from a high-dimensional GLM
+Title: Estimates the inflation and variance of the MLE from a high-dimensional GLM
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Qian",
@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "qzhao1@stanford.edu",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: This package estimates the bias and variance of maximum likelihood estimators (MLE)
+Description: This package estimates the inflation and variance of maximum likelihood estimators (MLE)
     of a generalized linear model (GLM). The estimates uses the high-dimensional asymptotics 
     assuming both sample size \eqn{n} and number of variables \eqn{p} goes to infinity. 
     In particular, the estimates assume that the variables are from a multivariate Gaussian or sub-Gaussian distribution. 
