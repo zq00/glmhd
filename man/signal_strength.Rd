@@ -53,7 +53,7 @@ The pair \eqn{(\beta_0, \gamma)} satisfies
      }
 \item The observed proportion of \eqn{Y=1} should be close to the expected proportion.
     \deqn{
-    p_0 \approx \prob(Y = 1\,|\, \beta_0, \gamma) = \mathrm{E}{\mathrm{Ber}(\rho'(\beta_0 + \gamma Z)}
+    p_0 \approx \mathrm{P}(Y = 1\,|\, \beta_0, \gamma) = \mathrm{E}{\mathrm{Ber}(\rho'(\beta_0 + \gamma Z)}
     }
    where \eqn{Z} is a standard normal variable.
 }

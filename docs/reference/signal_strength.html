@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Estimate problem parameters — signal_strength • glmhd</title>
+<title>Estimate intercept and signal strength — signal_strength • glmhd</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,9 @@
 
 
 
-<meta property="og:title" content="Estimate problem parameters — signal_strength" />
-<meta property="og:description" content="This function estimates \((\beta_0, \gamma_0)\) using the estimated \(\kappa_s\)
-and intercept \(b\)." />
+<meta property="og:title" content="Estimate intercept and signal strength — signal_strength" />
+<meta property="og:description" content="signal_strength estimates \((\beta_0, \gamma)\) using the estimated \(\kappa_s\)
+and observed proportion of successes." />
 
 
 
@@ -121,26 +121,23 @@ and intercept \(b\)." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Estimate problem parameters</h1>
+    <h1>Estimate intercept and signal strength</h1>
     <small class="dont-index">Source: <a href='https://github.com/zq00/glmhd/blob/master/R/signal_strength.R'><code>R/signal_strength.R</code></a></small>
     <div class="hidden name"><code>signal_strength.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This function estimates \((\beta_0, \gamma_0)\) using the estimated \(\kappa_s\)
-and intercept \(b\).</p>
+    <p><code>signal_strength</code> estimates \((\beta_0, \gamma)\) using the estimated \(\kappa_s\)
+and observed proportion of successes.</p>
     </div>
 
     <pre class="usage"><span class='fu'>signal_strength</span>(
   <span class='kw'>rho_prime</span> <span class='kw'>=</span> <span class='no'>rho_prime_logistic</span>,
-  <span class='kw'>f_prime1</span> <span class='kw'>=</span> <span class='no'>f_prime1_logistic</span>,
-  <span class='kw'>f_prime0</span> <span class='kw'>=</span> <span class='no'>f_prime0_logistic</span>,
   <span class='no'>kappa_hat</span>,
-  <span class='kw'>kappa</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='no'>intercept</span>,
-  <span class='kw'>b_hat</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>p0</span> <span class='kw'>=</span> <span class='fl'>NA</span>,
   <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>eps</span> <span class='kw'>=</span> <span class='fl'>0.1</span>
+  <span class='kw'>tol</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -152,48 +149,33 @@ and intercept \(b\).</p>
 here \(\beta\) is the coefficient. The default is logistic model.</p></td>
     </tr>
     <tr>
-      <th>f_prime1</th>
-      <td><p>A function. Derivative of the loss function when \(Y = 1\).
-The default is the derivative of the negative log-likelihood of logistic
-regression when \(Y = 1\).</p></td>
-    </tr>
-    <tr>
-      <th>f_prime0</th>
-      <td><p>A function. Derivative of the loss function when \(Y = -1\).
-The default is the derivative of the negative log-likelihood of logistic
-regression when \(Y = -1\).</p></td>
-    </tr>
-    <tr>
       <th>kappa_hat</th>
       <td><p>Numeric. Estimated dimension where the data becomes linearly separable</p></td>
     </tr>
     <tr>
-      <th>kappa</th>
-      <td><p>Numeric. Problem dimension \(\kappa = p/n\).</p></td>
-    </tr>
-    <tr>
       <th>intercept</th>
-      <td><p><code>TRUE</code> if the model contains an intercept.</p></td>
+      <td><p>Logical <code>TRUE</code> if the model contains an intercept.</p></td>
     </tr>
     <tr>
-      <th>b_hat</th>
-      <td><p>Numeric. MLE of the intercept.</p></td>
+      <th>p0</th>
+      <td><p>Numeric. Proportion of outcomes \(Y=1\).</p></td>
     </tr>
     <tr>
       <th>verbose</th>
       <td><p>Should progress be printed? If <code>TRUE</code>, prints progress at each step.</p></td>
     </tr>
     <tr>
-      <th>eps</th>
-      <td><p>Numeric. Terminate the algorithm if the search interval is smaller than <code>eps</code>.</p></td>
+      <th>tol</th>
+      <td><p>Numeric. Tolerance to be used in <code>fsolve</code> function.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list of two components</p><dl'>
-  <dt>gamma_hat</dt><dd><p>Estimated signal strength</p></dd>
-  <dt>beta_hat</dt><dd><p>Estimated intercept. <code>NULL</code> if the model does not have an intercept term</p></dd>
+    <p>If the model does not contain an intercept, returns estimated <code>gamma_hat</code>.
+    Otherwise, returns a list with two components</p><dl'>
+  <dt>gamma_hat</dt><dd><p>Estimated signal strength.</p></dd>
+  <dt>b_hat</dt><dd><p>Estimated intercept.</p></dd>
 
 </dl>
 
@@ -204,14 +186,17 @@ $$
 \mathrm{P}(Y=1\,|\,X) = \rho'(X^\top \beta + \beta_0),
 $$
 and let the signal strength be \(\gamma = \mathrm{Var}(X^\top \beta)^{1/2}\).
-The pair \((\beta_0, \gamma_0)\) satisfies</p><ul>
-<li><p>They are on the phase transition curve \(\kappa(\beta_0, \gamma_0)\).
-    We estimate the dimension \(\kappa(\beta_0, \gamma_0)\) in <code><a href='probe_frontier.html'>probe_frontier</a></code>.</p></li>
-<li><p>The set of parameters \((\kappa, \beta_0, \gamma_0)\) determines the asymptotic
-    an estimated intercept \(b\), which should be close to the MLE <code>b_hat</code>.</p></li>
-</ul><p>We use bisection to search for \(\beta_0\), for each \(\beta_0\) we compute \(\gamma_0\)
-on the phase transition curve, and compare the corresponding \(b\) with the
-MLE <code>b_hat</code>. The algorithm terminates when search window is smaller than <code>eps</code>.</p>
+The pair \((\beta_0, \gamma)\) satisfies</p><ul>
+<li><p>They are on the phase transition curve \(\kappa(\beta_0, \gamma)\).
+    $$
+    \hat{\kappa} \approx \kappa(\beta_0, \gamma)
+     $$</p></li>
+<li><p>The observed proportion of \(Y=1\) should be close to the expected proportion.
+    $$
+    p_0 \approx \mathrm{P}(Y = 1\,|\, \beta_0, \gamma) = \mathrm{E}{\mathrm{Ber}(\rho'(\beta_0 + \gamma Z)}
+    $$
+   where \(Z\) is a standard normal variable.</p></li>
+</ul><p>We solve the above system of two equations to obtain an estimate of \((\beta_0, \gamma)\)</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
@@ -219,7 +204,6 @@ MLE <code>b_hat</code>. The algorithm terminates when search window is smaller t
 <span class='co'># should return 0, returns 0.0127</span>
 <span class='no'>signal</span> <span class='kw'>&lt;-</span> <span class='fu'>signal_strength</span>(<span class='kw'>kappa_hat</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 <span class='no'>signal</span>$<span class='no'>gamma_hat</span>
-<span class='no'>signal</span>$<span class='no'>b_hat</span>
 }</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

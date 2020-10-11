@@ -196,23 +196,23 @@ used to fit the <code>glm</code>. If there's no new data, it outputs the estimat
 <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>adjusted_fit</span>), <span class='kw'>max</span> <span class='kw'>=</span> <span class='fl'>40</span>)</div><div class='output co'>#&gt; Call:
 #&gt; adjust_glm(glm_output = fit)
 #&gt; 
-#&gt;      adjusted_mle        std z.value   p.value    
-#&gt; X1     -0.0191088  0.0958177 -0.1994 0.8419275    
-#&gt; X2      0.2634231  0.0996318  2.6440 0.0081941 ** 
-#&gt; X3      0.1436590  0.0943073  1.5233 0.1276819    
-#&gt; X4      0.2569481  0.0940849  2.7310 0.0063138 ** 
-#&gt; X5     -0.1776332  0.0931093 -1.9078 0.0564179 .  
-#&gt; X6      0.2309281  0.0953822  2.4211 0.0154744 *  
-#&gt; X7      0.1740878  0.0949737  1.8330 0.0668012 .  
-#&gt; X8      0.1010892  0.0996689  1.0143 0.3104632    
+#&gt;      adjusted_mle         std z.value   p.value    
+#&gt; X1    -0.05120675  0.09129046 -0.5609 0.5748513    
+#&gt; X2     0.19716131  0.09126411  2.1603 0.0307465 *  
+#&gt; X3     0.01883666  0.09350460  0.2015 0.8403454    
+#&gt; X4     0.23230363  0.09223395  2.5186 0.0117811 *  
+#&gt; X5     0.06361850  0.09457172  0.6727 0.5011375    
+#&gt; X6     0.14050059  0.09135025  1.5380 0.1240382    
+#&gt; X7     0.11987165  0.09263620  1.2940 0.1956639    
+#&gt; X8     0.13572113  0.09393962  1.4448 0.1485226    
 #&gt;  [ reached getOption("max.print") -- omitted 292 rows ]
 #&gt; ---
 #&gt; Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</div><div class='input'><span class='co'># Predict on new data</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>(<span class='no'>adjusted_fit</span>))</div><div class='output co'>#&gt; [1]  1.1646301  0.1507479 -4.0982981 -0.7192127  1.8776390 -0.3789456</div><div class='input'><span class='co'># Extract adjusted coefficients</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>(<span class='no'>adjusted_fit</span>))</div><div class='output co'>#&gt; [1] -0.47390481 -0.89463130  0.39557465 -1.96782805 -0.04959725 -0.49277543</div><div class='input'><span class='co'># Extract adjusted coefficients</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>adjusted_fit</span>$<span class='no'>coef_adj</span>)</div><div class='output co'>#&gt;          X1          X2          X3          X4          X5          X6 
-#&gt; -0.01910879  0.26342309  0.14365901  0.25694813 -0.17763325  0.23092806 </div><div class='input'><span class='co'># Extract adjusted standard error</span>
+#&gt; -0.05120675  0.19716131  0.01883666  0.23230363  0.06361850  0.14050059 </div><div class='input'><span class='co'># Extract adjusted standard error</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>adjusted_fit</span>$<span class='no'>std_adj</span>)</div><div class='output co'>#&gt;        X1        X2        X3        X4        X5        X6 
-#&gt; 0.1765595 0.1835876 0.1737765 0.1733665 0.1715689 0.1757570 </div></pre>
+#&gt; 0.1644027 0.1643552 0.1683900 0.1661018 0.1703118 0.1645103 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

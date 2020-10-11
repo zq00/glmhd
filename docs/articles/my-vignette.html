@@ -82,7 +82,7 @@
       <h1 data-toc-skip>glmhd: statistical inference in high-dimensional binary regression</h1>
                         <h4 class="author">Qian Zhao</h4>
             
-            <h4 class="date">2020-07-09</h4>
+            <h4 class="date">2020-10-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/zq00/glmhd/blob/master/vignettes/my-vignette.Rmd"><code>vignettes/my-vignette.Rmd</code></a></small>
       <div class="hidden name"><code>my-vignette.Rmd</code></div>
@@ -125,12 +125,12 @@
 <p>We repeat this function <span class="math inline">\(B = 200\)</span> times, and draw a histogram of the MLE of the <span class="math inline">\(p\)</span>th coefficient.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">beta_hat</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span>(<span class="no">B</span> <span class="kw">&lt;-</span> <span class="fl">200</span>, <span class="fu">sample_logistic</span>(<span class="no">n</span>, <span class="no">beta</span>, <span class="no">R</span>))</pre></body></html></div>
 <p><img src="my-vignette_files/figure-html/unnamed-chunk-7-1.png" width="480" style="display: block; margin: auto;"></p>
-<p>As we can see, the estimated <span class="math inline">\(\hat{\beta}\)</span> is not centered at the true value <span class="math inline">\(\beta = 4\)</span> (black line). The average <span class="math inline">\(\hat{\beta}\)</span> is at 6.268, which is larger. If we look at a single simulation below, the estimated standard error of <span class="math inline">\(\hat{\beta}_p\)</span> is 4.903, which is smaller than the observed standard deviation 5.438 from the independent samples.</p>
+<p>As we can see, the estimated <span class="math inline">\(\hat{\beta}\)</span> is not centered at the true value <span class="math inline">\(\beta = 4\)</span> (black line). The average <span class="math inline">\(\hat{\beta}\)</span> is at 5.898, which is larger. If we look at a single simulation below, the estimated standard error of <span class="math inline">\(\hat{\beta}_p\)</span> is 4.213, which is smaller than the observed standard deviation 5.087 from the independent samples.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">X</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="no">n</span> * <span class="no">p</span>, <span class="fl">0</span>, <span class="fl">1</span>), <span class="no">n</span>, <span class="no">p</span>) <span class="kw">%*%</span> <span class="no">R</span> / <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="no">n</span>)
 <span class="no">Y</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html">rbinom</a></span>(<span class="no">n</span>, <span class="fl">1</span>, <span class="fl">1</span> / (<span class="fl">1</span> + <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(- <span class="no">X</span> <span class="kw">%*%</span> <span class="no">beta</span>)))
 <span class="no">fit</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span>(<span class="no">Y</span> ~ <span class="no">X</span> + <span class="fl">0</span>, <span class="kw">family</span> <span class="kw">=</span> <span class="no">binomial</span>)</pre></body></html></div>
 <div class="sourceCode"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">fit</span>)$<span class="no">coef</span>[<span class="no">p</span>,<span class="fl">2</span>] <span class="co"># estimated std. from inverse Fisher information</span>
-<span class="co">#&gt; [1] 4.9</span></pre></body></html></div>
+<span class="co">#&gt; [1] 4.21</span></pre></body></html></div>
 <p>In general, as <span class="math inline">\(n, p\to\infty\)</span> at a fixed ratio <span class="math inline">\(p / n\to \kappa \in (0, 1)\)</span>, and if the variables <span class="math inline">\(X\)</span> to be multivariate Gaussian, the MLE of any coordinate <span class="math inline">\(\beta_j\)</span> satisfies <span class="math display">\[
 \frac{\hat{\beta}_j^\mathrm{MLE} - \alpha_\star \beta_j}{\sigma_\star / \tau_j} \stackrel{d}{\longrightarrow} \mathcal{N}(0, 1),
 \]</span> where <span class="math inline">\(\tau^2_j = \mathrm{Var}(x_j\,|\,x_{-j})\)</span> is the conditional variance of <span class="math inline">\(j\)</span>th variable given all the others [1]. These parameters <span class="math inline">\((\alpha_\star, \sigma_\star)\)</span> can be computed given <span class="math inline">\(\kappa = p/n\)</span> and <span class="math inline">\(\gamma = \sqrt{\mathrm{Var}(X^\top \beta)}\)</span>. In this example, <span class="math display">\[
@@ -147,20 +147,20 @@
 <span class="no">fit</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span>(<span class="no">Y</span> ~ <span class="no">X</span> + <span class="fl">0</span>, <span class="kw">family</span> <span class="kw">=</span> <span class="no">binomial</span>, <span class="kw">x</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">y</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
 <p>Now we call the function <code>adjust_glm</code> to compute the adjusted MLE and standard error. There are three arguments for this function, but you only need to input the first one, the output <code>glm</code> object. Below, the second argument and third arguments are set at their default values, <code>verbose</code> specifies if progress should be printed, and <code>echo = TRUE</code> means that the input <code>glm</code> object is also returned in the output. Setting<code>verbose = TRUE</code> helps to track progress of the code, and identify issues if the algorithm fails.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">adjusted_fit</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/adjust_glm.html">adjust_glm</a></span>(<span class="no">fit</span>, <span class="kw">verbose</span> <span class="kw">=</span> <span class="fl">FALSE</span>, <span class="kw">echo</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
-<p>You can access the estimated parameters through <code>adjusted_fit$param</code>. <code>adjusted_fit$param["alpha_s"]</code> outputs estimated <span class="math inline">\(\alpha_\star\)</span> and <code>adjusted_fit$param["sigma_s"]</code> outputs estimated <span class="math inline">\(\sqrt{\kappa}\sigma_\star\)</span>. For example, you can compare the estimated inflation 1.512 with the observed value 1.567.</p>
+<p>You can access the estimated parameters through <code>adjusted_fit$param</code>. In this vector, <code>adjusted_fit$param["alpha_s"]</code> is estimated <span class="math inline">\(\alpha_\star\)</span> and <code>adjusted_fit$param["sigma_s"]</code> is estimated <span class="math inline">\(\sqrt{\kappa}\sigma_\star\)</span>. For example, you can compare the estimated inflation 1.426 with the observed value 1.475.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">adjusted_fit</span>$<span class="no">param</span>[<span class="st">"alpha_s"</span>] <span class="co"># Estimated inflation</span>
 <span class="co">#&gt; alpha_s </span>
-<span class="co">#&gt;    1.51</span>
+<span class="co">#&gt;    1.43</span>
 <span class="no">adjusted_fit</span>$<span class="no">param</span>[<span class="st">"sigma_s"</span>] / <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="no">p</span>/<span class="no">n</span>) <span class="co"># estimated sigma_star</span>
 <span class="co">#&gt; sigma_s </span>
-<span class="co">#&gt;    4.83</span></pre></body></html></div>
+<span class="co">#&gt;     4.2</span></pre></body></html></div>
 <p>You can obtain the adjusted MLE <span class="math inline">\(\hat{\beta}^\mathrm{Adj}_p = \hat{\beta}_p^\mathrm{MLE} / \alpha_\star\)</span> and the adjusted standard error estimate <span class="math inline">\(\sigma_\star / \tau_j\)</span> as follows.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">adjusted_fit</span>$<span class="no">coef_adj</span>[<span class="no">p</span>] <span class="co"># Adjusted MLE</span>
 <span class="co">#&gt; X200 </span>
-<span class="co">#&gt; 6.23</span>
+<span class="co">#&gt; 9.62</span>
 <span class="no">adjusted_fit</span>$<span class="no">std_adj</span>[<span class="no">p</span>] <span class="co"># Adjusted std. </span>
 <span class="co">#&gt; X200 </span>
-<span class="co">#&gt; 5.64</span></pre></body></html></div>
+<span class="co">#&gt; 4.82</span></pre></body></html></div>
 <p>Next, <code><a href="https://rdrr.io/r/base/summary.html">summary(adjusted_fit)</a></code> prints the coefficient table. The first column is the adjusted MLE, the second column is <span class="math inline">\(\hat{\sigma}_j / \alpha_\star\)</span>, because the adjusted MLE satisfies <span class="math display">\[
 \frac{\hat{\beta}_j^\mathrm{Adj} - \beta_j}{\hat{\sigma}_j / \alpha_\star} \approx \mathcal{N}(0, 1),
 \]</span> for <span class="math inline">\(\hat{\sigma}_j = \sigma_\star / \tau_j\)</span> the adjusted std. estimate.</p>
@@ -169,14 +169,14 @@
 <span class="co">#&gt; adjust_glm(glm_output = fit, verbose = FALSE, echo = TRUE)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      adjusted_mle      std z.value p.value    </span>
-<span class="co">#&gt; X1        0.07134  3.87941    0.02 0.98533    </span>
-<span class="co">#&gt; X2       -7.27662  4.16548   -1.75 0.08066 .  </span>
-<span class="co">#&gt; X3        3.60775  3.98884    0.90 0.36575    </span>
-<span class="co">#&gt; X4        6.25054  4.06152    1.54 0.12381    </span>
-<span class="co">#&gt; X5       -6.79963  4.04217   -1.68 0.09254 .  </span>
-<span class="co">#&gt; X6       -1.37376  4.19924   -0.33 0.74356    </span>
-<span class="co">#&gt; X7        4.40831  4.17838    1.06 0.29141    </span>
-<span class="co">#&gt; X8       -7.59541  3.94672   -1.92 0.05429 .  </span>
+<span class="co">#&gt; X1        -3.0757   3.4832   -0.88 0.37722    </span>
+<span class="co">#&gt; X2         3.0828   3.9776    0.78 0.43831    </span>
+<span class="co">#&gt; X3        -3.2437   3.7631   -0.86 0.38870    </span>
+<span class="co">#&gt; X4         1.6675   3.7871    0.44 0.65972    </span>
+<span class="co">#&gt; X5         4.6672   3.7859    1.23 0.21766    </span>
+<span class="co">#&gt; X6        -3.2132   3.7248   -0.86 0.38833    </span>
+<span class="co">#&gt; X7         4.4828   3.6796    1.22 0.22312    </span>
+<span class="co">#&gt; X8        -5.6674   3.6015   -1.57 0.11558    </span>
 <span class="co">#&gt;  [ reached getOption("max.print") -- omitted 192 rows ]</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></pre></body></html></div>
@@ -184,7 +184,7 @@
 <div id="hypothesis-testing" class="section level4">
 <h4 class="hasAnchor">
 <a href="#hypothesis-testing" class="anchor"></a>Hypothesis testing</h4>
-<p>The <code>summary</code> function prints the adjusted MLE <span class="math inline">\(\hat{\beta}^\mathrm{Adj}\)</span> and its std. <span class="math inline">\(\hat{\sigma} / \alpha_\star\)</span>, as well as a z-statistics <span class="math inline">\(z = \hat{\beta}/\hat{\sigma}^\mathrm{MLE}\)</span> and a P-value <span class="math inline">\(\mathrm{P}(|\mathcal{N}(0,1)|\geq |z|)\)</span>. If the variables are multivariate Gaussian and the true model is logistic, then this p-value is from a Uniform[0,1] distribution under the null hypothesis that <span class="math inline">\(\beta_j = 0\)</span>.</p>
+<p>The <code>summary</code> function prints the adjusted MLE <span class="math inline">\(\hat{\beta}^\mathrm{Adj}\)</span> and its std. <span class="math inline">\(\hat{\sigma} / \alpha_\star\)</span>, as well as a z-statistics <span class="math inline">\(z = \hat{\beta}/\hat{\sigma}^\mathrm{MLE}\)</span> and a two-sided p-value <span class="math inline">\(\mathrm{P}(|\mathcal{N}(0,1)|\geq |z|)\)</span>. If the variables are multivariate Gaussian and the true model is logistic, then this p-value is from a Uniform[0,1] distribution under the null hypothesis that <span class="math inline">\(\beta_j = 0\)</span>.</p>
 <p>The following is a simulation to examine whether the calculated p-value is approximately uniform. For simplicity, we consider the first variable, which is a null, and the function is also included at the beginning.</p>
 <div class="sourceCode"><html><body><pre class="r"># pval_adj &lt;- replicate(B &lt;- 100, sample_logistic(n, p, R, adjust = TRUE))</pre></body></html></div>
 <p>You can use the likelihood ratio test (LRT) by calling the function <code>lrt_glm</code>. It requires two arguments, the first is a list of <code>glm</code> fits and the second is the <code>param</code> output from <code>adjust_glm</code>. It prints the likelihood ratio statistics and p-values computed according to the rescaled chi-squared distribution. Under the null hypothesis <span class="math display">\[
@@ -207,8 +207,8 @@ H_0:\quad \beta_1 = \ldots = \beta_k = 0,
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $anova.tab</span>
 <span class="co">#&gt;   Resid.Df Resid.Dev Df Deviance p.value</span>
-<span class="co">#&gt; 1      801       589 NA       NA      NA</span>
-<span class="co">#&gt; 2      800       589  1 0.000479   0.986</span>
+<span class="co">#&gt; 1      801       698 NA       NA      NA</span>
+<span class="co">#&gt; 2      800       697  1     1.06   0.386</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; attr(,"class")</span>
 <span class="co">#&gt; [1] "lrt_adj"</span></pre></body></html></div>
@@ -238,33 +238,32 @@ H_0:\quad \beta_1 = \ldots = \beta_k = 0,
 }</pre></body></html></div>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">beta_hat</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span>(<span class="no">B</span>, <span class="fu">sample_logistic_intercept</span>(<span class="no">n</span>, <span class="no">beta</span>, <span class="no">R</span>))</pre></body></html></div>
 <p><img src="my-vignette_files/figure-html/unnamed-chunk-21-1.png" width="480" style="display: block; margin: auto;"></p>
-<p>The observed inflation in 200 samples is 1.431 and observed standard deviation is 5.973. The theoretical density curve of <span class="math inline">\(\hat{\beta}_p\)</span> is shown in blue, and it agrees well with the histogram of <span class="math inline">\(\hat{\beta}_p\)</span>.</p>
+<p>The observed inflation in 200 samples is 1.452 and observed standard deviation is 5.894. The theoretical density curve of <span class="math inline">\(\hat{\beta}_p\)</span> is shown in blue, and it agrees well with the histogram of <span class="math inline">\(\hat{\beta}_p\)</span>.</p>
 <p>You can use the same function <code>adjust_glm</code> to compute the adjusted MLE <span class="math inline">\(\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}_j^\mathrm{MLE} / \alpha_\star\)</span> and adjusted standard error <span class="math inline">\(\sigma_\star / \tau_j\)</span> without knowing the true parameters.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">X</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span>(<span class="no">n</span> * <span class="no">p</span>, <span class="fl">0</span>, <span class="fl">1</span>), <span class="no">n</span>, <span class="no">p</span>) <span class="kw">%*%</span> <span class="no">R</span> / <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="no">n</span>)
 <span class="no">Y</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html">rbinom</a></span>(<span class="no">n</span>, <span class="fl">1</span>, <span class="fl">1</span> / (<span class="fl">1</span> + <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(- <span class="no">X</span> <span class="kw">%*%</span> <span class="no">beta</span> + <span class="fl">0.5</span>)))
 <span class="no">fit</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span>(<span class="no">Y</span> ~ <span class="no">X</span>, <span class="kw">family</span> <span class="kw">=</span> <span class="no">binomial</span>, <span class="kw">x</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">y</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
 <div class="sourceCode"><html><body><pre class="r"><span class="co"># Adjust MLE coefficients</span>
 <span class="no">adjusted_fit</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/adjust_glm.html">adjust_glm</a></span>(<span class="no">fit</span>, <span class="kw">verbose</span> <span class="kw">=</span> <span class="fl">FALSE</span>)</pre></body></html></div>
-<p><code>adjusted_fit$intercept</code> returns the estimated intercept, which you can compare with the MLE -0.785.</p>
+<p><code>adjusted_fit$intercept</code> returns the estimated intercept, which you can compare with the MLE -0.716.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="no">adjusted_fit</span>$<span class="no">intercept</span>
-<span class="co">#&gt; (Intercept) </span>
-<span class="co">#&gt;      -0.528</span></pre></body></html></div>
-<p>You can also find the estimated bias and standard deviation like before.</p>
+<span class="co">#&gt; numeric(0)</span></pre></body></html></div>
+<p>You can also find the estimated inflation and standard deviation like before.</p>
 <div class="sourceCode"><html><body><pre class="r"><span class="co"># Estimated inflation and std.</span>
 <span class="no">adjusted_fit</span>$<span class="no">param</span>[<span class="st">"alpha_s"</span>]
 <span class="co">#&gt; alpha_s </span>
-<span class="co">#&gt;    1.52</span>
+<span class="co">#&gt;    1.57</span>
 <span class="no">adjusted_fit</span>$<span class="no">param</span>[<span class="st">"sigma_s"</span>] / <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span>(<span class="no">p</span>/<span class="no">n</span>)
 <span class="co">#&gt; sigma_s </span>
-<span class="co">#&gt;    4.87</span>
+<span class="co">#&gt;    5.22</span>
 <span class="co"># Adjusted MLE</span>
 <span class="no">adjusted_fit</span>$<span class="no">coef_adj</span>[<span class="no">p</span>]
 <span class="co">#&gt; X200 </span>
-<span class="co">#&gt; 5.75</span>
+<span class="co">#&gt;   12</span>
 <span class="co"># Adjusted std.</span>
 <span class="no">adjusted_fit</span>$<span class="no">std_adj</span>[<span class="no">p</span>]
 <span class="co">#&gt; X200 </span>
-<span class="co">#&gt; 5.71</span></pre></body></html></div>
+<span class="co">#&gt; 6.02</span></pre></body></html></div>
 </div>
 <div id="other-link-functions" class="section level4">
 <h4 class="hasAnchor">

@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Adjust the MLE in a binary regression — adjust_binary" />
-<meta property="og:description" content="This function computes the asymptotic bias and variance of the MLE of a binary regression
+<meta property="og:description" content="This function computes the asymptotic inflation and variance of the MLE of a binary regression
 when both \(n\) and \(p\) are large,
 assuming that covariates \(X\) are multivariate Gaussian." />
 
@@ -128,7 +128,7 @@ assuming that covariates \(X\) are multivariate Gaussian." />
     </div>
 
     <div class="ref-description">
-    <p>This function computes the asymptotic bias and variance of the MLE of a binary regression
+    <p>This function computes the asymptotic inflation and variance of the MLE of a binary regression
 when both \(n\) and \(p\) are large,
 assuming that covariates \(X\) are multivariate Gaussian.</p>
     </div>
@@ -162,13 +162,14 @@ for example the output from the <code><a href='https://rdrr.io/r/stats/glm.html'
     <p>A list with elements</p><dl'>
 <dt>glm_output</dt><dd><p>If <code>echo = TRUE</code>, returns the input <code>glm_output</code>.</p></dd>
 <dt>gamma_hat</dt><dd><p>Estimated signal strength \(\gamma_0\).</p></dd>
-<dt>param</dt><dd><p>Estimated paramters \((\alpha_\star, \lambda_\star, \sigma_\star, b_\star)\)</p></dd>
+<dt>param</dt><dd><p>Estimated paramters \((\alpha_\star, \lambda_\star, \sigma_\star, b_\star)\).
+   If the model does not contain an intercept, returns \((\alpha_\star, \lambda_\star, \sigma_\star)\).</p></dd>
 <dt>intercept</dt><dd><p>Does the model contain an intercept?</p></dd>
-<dt>tau_hat</dt><dd><p>Estimated conditional standard deviation</p></dd>
+<dt>tau_hat</dt><dd><p>Estimated conditional standard deviation.</p></dd>
 <dt>coef_adj</dt><dd><p>Adjusted MLE: this is \(\hat{\beta}^{\mathrm{MLE}} / \alpha_\star\).</p></dd>
 <dt>std_adj</dt><dd><p>Estimated standard error of \(\hat{\beta}_j\): \(\sigma_\star / \tau_j\).</p></dd>
 <dt>coef_unadj</dt><dd><p>Unadjusted MLE.</p></dd>
-<dt>std_unadj</dt><dd><p>Unadjusted standard error. This is output from the <code><a href='https://rdrr.io/r/stats/glm.html'>glm</a></code>.</p></dd>
+<dt>std_unadj</dt><dd><p>Unadjusted standard error. This is output from the <code><a href='https://rdrr.io/r/stats/glm.html'>glm</a></code> function.</p></dd>
 
 </dl>
 
@@ -183,6 +184,16 @@ $$
 where \(\tau_j^2\) is the conditional variance of \(x_j\) given all the other variables.
 This implies \(\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}^{MLE}_j / \alpha_\star\) is unbiased for the coefficient \(\beta_j\).
 <code>adjust_binary</code> computes \(\hat{\beta}_j^\mathrm{Adj}\) and returns it in the vector <code>coef_adj</code>.</p>
+    <h2 class="hasAnchor" id="additional-arguments"><a class="anchor" href="#additional-arguments"></a>Additional arguments</h2>
+
+    
+
+<dl'>
+    <dt>B</dt><dd><p>Number of repetitions at each <code>kappa</code> in <em>ProbeFrontier</em> algorithm.</p></dd>
+    <dt>tol</dt><dd><p><code>tol</code> parameter when solving for signal strength and intercept. see <code>signal_strength</code>.</p></dd>
+
+</dl>
+
     <h2 class="hasAnchor" id="notes"><a class="anchor" href="#notes"></a>Notes</h2>
 
     
@@ -192,6 +203,7 @@ This implies \(\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}^{MLE}_j / \alpha_\star\)
 <li><p>The input to this function should be an object from the class <code>glm</code>,
   and it should include <code>family</code> specifying the link function. Currently, the algorithm
   can handle logit and probit link.</p></li>
+<li><p>if estimated \(\hat{\gamma}&lt;0.0001\), we set \(\gamma=0\).</p></li>
 </ul>
 
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
@@ -199,8 +211,7 @@ This implies \(\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}^{MLE}_j / \alpha_\star\)
     <p><em>The Asymptotic Distribution of the MLE in High-dimensional Logistic Models: Arbitrary Covariance</em>, Qian Zhao, Pragya Sur and Emmanuel J. Candes, arXiv:2001.09351</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='co'># Problem size</span>
+    <pre class="examples"><div class='input'><span class='co'># Problem size</span>
 <span class='no'>n</span> <span class='kw'>&lt;-</span> <span class='fl'>1000L</span>
 <span class='no'>p</span> <span class='kw'>&lt;-</span> <span class='fl'>300L</span>
 <span class='co'># Generate data matrix</span>
@@ -210,10 +221,26 @@ This implies \(\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}^{MLE}_j / \alpha_\star\)
 <span class='co'># Generate response</span>
 <span class='no'>Y</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/Binomial.html'>rbinom</a></span>(<span class='no'>n</span>, <span class='fl'>1</span>, <span class='fl'>1</span> / (<span class='fl'>1</span> + <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span>(- <span class='no'>X</span> <span class='kw'>%*%</span> <span class='no'>beta</span>)))
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span>(<span class='no'>Y</span> ~ <span class='no'>X</span> + <span class='fl'>0</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='no'>binomial</span>, <span class='kw'>x</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>y</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
-<span class='no'>adjusted_fit</span> <span class='kw'>&lt;-</span> <span class='fu'>adjust_binary</span>(<span class='no'>fit</span>)
-<span class='co'># Adjusted MLE</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>adjusted_fit</span>$<span class='no'>coef_unadj</span>)
-}</div></pre>
+<span class='no'>adjusted_fit</span> <span class='kw'>&lt;-</span> <span class='fu'>adjust_binary</span>(<span class='no'>fit</span>)</div><div class='output co'>#&gt; Link function:  logit 
+#&gt; ------ Begin Probe Frontior ------
+#&gt; kappa =  0.405 ; pi_hat =  1 
+#&gt; kappa =  0.3525 ; pi_hat =  0 
+#&gt; kappa =  0.37875 ; pi_hat =  0.1 
+#&gt; kappa =  0.391875 ; pi_hat =  0.3 
+#&gt; kappa =  0.3984375 ; pi_hat =  0.9 
+#&gt; kappa =  0.3951562 ; pi_hat =  0.2 
+#&gt; kappa =  0.3967969 ; pi_hat =  0.6 
+#&gt; kappa =  0.3959766 ; pi_hat =  0.6 
+#&gt; Found kappa_s =  0.3948151 
+#&gt; ------- 
+#&gt; -- Finding signal strength and the intercept -- 
+#&gt;  No intercept, estimated signal strength gamma_hat =  1.417072 
+#&gt;  ---- 
+#&gt; Found parameters:
+#&gt;  alpha_s lambda_s  sigma_s 
+#&gt; 1.842661 5.017366 3.020828 </div><div class='input'><span class='co'># Adjusted MLE</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>adjusted_fit</span>$<span class='no'>coef_unadj</span>)</div><div class='output co'>#&gt;         X1         X2         X3         X4         X5         X6 
+#&gt; -0.6098728  8.4073672  4.5849969  8.2007135 -5.6693130  7.3702615 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
