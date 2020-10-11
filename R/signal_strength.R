@@ -23,6 +23,7 @@
 #' We solve the above system of two equations to obtain an estimate of \eqn{(\beta_0, \gamma)}
 #'
 #' @importFrom pracma fsolve
+#' @importFrom stats integrate
 #' @include prox_op.R h_eq.R find_param.R
 #' @param rho_prime A function that computes the success probability \eqn{\rho'(t) = \mathrm{P}(Y=1 | X^\top \beta = t)},
 #'     here \eqn{\beta} is the coefficient. The default is logistic model.
