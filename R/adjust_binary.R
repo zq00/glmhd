@@ -20,6 +20,7 @@
 #'   \item The input to this function should be an object from the class \code{glm},
 #'   and it should include \code{family} specifying the link function. Currently, the algorithm
 #'   can handle logit and probit link.
+#'   \item if gamma<0.0001, set gamma = 0
 #' }
 #'
 #' @param glm_output An object from the class \code{glm},
@@ -63,53 +64,45 @@
 #' }
 #' @export
 adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
-  # Extract model matrix
+  # extract model matrix
   X <- glm_output$x
   Y <- (2 * glm_output$y) - 1
-  # Problem dimension
+  # problem dimension
   n <- nrow(X); p <- ncol(X)
   kappa <- p/n
-  # Obtain link functions
+  # link functions
   link_fun <- process_link(glm_output$family)
   if(verbose) cat("Link function: ", glm_output$family$link, "\n")
-  # Is there an intercept in the model?
-  has_intercept <- ifelse(names(glm_output$coef[1]) == "(Intercept)",
-                          TRUE, FALSE)
-  # If the data is linearly separable, stop and print message
-  if(is_separable(X,Y)) {
-    cat("Data is separable. MLE does not exist!")
-    return(0)
-  }
-  # Problem dimension that data becomes separable
+  # is there an intercept in the model?
+  has_intercept <- ifelse(names(glm_output$coef[1]) == "(Intercept)", TRUE, FALSE)
+  # if the data is linearly separable, stop and print message
+  if(is_separable(X,Y)) {cat("Data is separable. MLE does not exist!"); return(0)}
+  # problem dimension that data becomes separable
   kappa_hat <- probe_frontier(X, Y, verbose = verbose, ...)
 
-  # Estimate signal strength
+  # estimate signal strength
+  p0 <- mean((Y+1)/2)
   signal_strength <- signal_strength(rho_prime = link_fun$rho_prime,
-                                     f_prime1 = link_fun$f_prime1,
-                                     f_prime0 = link_fun$f_prime0,
-                                     kappa_hat, kappa, has_intercept,
-                                     b_hat = ifelse(has_intercept, abs(glm_output$coef[1]), NULL),
-                                     verbose = verbose)
-  # Calculate parameters based on (kappa, gamma_hat)
+                                     kappa_hat,
+                                     has_intercept, p0, verbose)
+  # calculate parameters based on (kappa, gamma_hat)
+  gamma_hat <- ifelse(signal_strength$gamma_hat > 1e-4, signal_strength$gamma_hat, 0)
   param <- find_param(
     rho_prime = link_fun$rho_prime,
     f_prime1 = link_fun$f_prime1,
     f_prime0 = link_fun$f_prime0,
     kappa,
-    gamma = signal_strength$gamma_hat,
-    beta0 = ifelse(is.null(signal_strength$beta_hat), 0, signal_strength$beta_hat),
+    gamma = gamma_hat,
     intercept = has_intercept,
+    beta0 = ifelse(!has_intercept, 0, signal_strength$b_hat),
     verbose = FALSE
   )
-  if(has_intercept){
-    names(param) <- c("alpha_s", "lambda_s", "sigma_s", "b_s")
-  }else{
-    names(param) <- c("alpha_s", "lambda_s", "sigma_s")
+
+  if(has_intercept){names(param) <- c("alpha_s", "lambda_s", "sigma_s", "b_s")
+  }else{ names(param) <- c("alpha_s", "lambda_s", "sigma_s")
   }
 
-  if(verbose) cat("Found parameters:\n alpha_s = ", param["alpha_s"],
-                  "\t sigma_s = ", param["sigma_s"])
-
+  if(verbose) {cat("Found parameters:\n"); print(param)}
   if(has_intercept){
     # Conditional standard deviation
     tau_hat <- 1 / sqrt(diag(solve(t(X[ , -1]) %*% X[ , -1]))) / sqrt(n) / sqrt(1 - kappa)
@@ -120,7 +113,7 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
       list(
         glm_output = ifelse(echo, glm_output, NA),
         param = param,
-        gamma_hat = signal_strength$gamma_hat,
+        gamma_hat = gamma_hat,
         intercept = signal_strength$beta_hat * sign(glm_output$coef[1]),
         tau_hat = tau_hat,
         coef_adj = coef_adj,
@@ -130,9 +123,9 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
       )
     )
   }else{
-    # Conditional standard deviation
+    # conditional standard deviation
     tau_hat <- 1 / sqrt(diag(solve(t(X) %*% X))) / sqrt(n) / sqrt(1 - kappa)
-    # The adjusted mle and standard error
+    # the adjusted mle and standard error
     coef_adj <- glm_output$coefficients / param["alpha_s"]
     std_adj <- param["sigma_s"] / sqrt(p) / tau_hat
     return(
