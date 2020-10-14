@@ -118,7 +118,7 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
         glm_output = ifelse(echo, glm_output, NA),
         param = param,
         gamma_hat = gamma_hat,
-        intercept = signal_strength$beta_hat * sign(glm_output$coef[1]),
+        intercept = signal_strength$b_hat * sign(glm_output$coef[1]),
         tau_hat = tau_hat,
         coef_adj = coef_adj,
         std_adj = std_adj,
