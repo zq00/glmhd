@@ -83,7 +83,9 @@ adjust_binary <- function(glm_output, verbose = TRUE, echo = TRUE, ...){
   if(is_separable(X,Y)) {cat("Data is separable. MLE does not exist!"); return(0)}
   # problem dimension that data becomes separable
   kappa_hat <- probe_frontier(X, Y, verbose = verbose, ...)
-
+  if(kappa_hat < 1e-8){
+    return(-1)
+  }
   # estimate signal strength
   p0 <- mean((Y+1)/2)
   signal_strength <- signal_strength(rho_prime = link_fun$rho_prime,
