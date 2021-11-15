@@ -8,7 +8,7 @@
 #' based on the theory when \eqn{n} and \eqn{p} grows to infinity, and the covariates are multivariate Gaussian.
 #' In this setting, the MLE of one variable \eqn{\beta_j} is
 #' \deqn{
-#' \hat{\beta}^{\mathrm{MLE}}_j - \alpha_\star \beta_j \approx \mathcal{N}(0, \sigma_\star^2 / \tau_j^2).
+#' \sqrt{n}(\hat{\beta}^{\mathrm{MLE}}_j - \alpha_\star \beta_j) \approx \mathcal{N}(0, \sigma_\star^2 / \tau_j^2).
 #' }
 #' where \eqn{\tau_j^2} is the conditional variance of \eqn{x_j} given all the other variables.
 #' This implies \eqn{\hat{\beta}_j^\mathrm{Adj} = \hat{\beta}^{MLE}_j / \alpha_\star} is unbiased for the coefficient \eqn{\beta_j}.
@@ -39,7 +39,7 @@
 #' \item{gamma_hat}{Estimated signal strength \eqn{\gamma_0}.}
 #' \item{param}{Estimated paramters \eqn{(\alpha_\star, \lambda_\star, \sigma_\star, b_\star)}.
 #'    If the model does not contain an intercept, returns \eqn{(\alpha_\star, \lambda_\star, \sigma_\star)}.}
-#' \item{intercept}{Does the model contain an intercept?}
+#' \item{intercept}{If the model contains an intercept, return the estimated intercept; otherwise return FALSE. }
 #' \item{tau_hat}{Estimated conditional standard deviation.}
 #' \item{coef_adj}{Adjusted MLE: this is \eqn{\hat{\beta}^{\mathrm{MLE}} / \alpha_\star}.}
 #' \item{std_adj}{Estimated standard error of \eqn{\hat{\beta}_j}: \eqn{\sigma_\star / \tau_j}.}
