@@ -11,7 +11,7 @@
 #'     \code{Y} has the same length as the number of rows in \code{X}.
 #' @param add_intercept If \code{TRUE}, add an intercept to the matrix \code{X}.
 #'     Set to \code{FALSE} by default.
-#' @return Returns 1 if the data is separable and 0 otherwise.
+#' @return Returns 1 if the data is separable (or if (y_i, x_i) is not full column rank) and 0 otherwise.
 #'
 #' @keywords internal
 #' @importFrom ECOSolveR ECOS_csolve

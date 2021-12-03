@@ -24,7 +24,7 @@
 #'
 #' @include hinge.R integrate2_normal.R
 #' @importFrom stats uniroot optim
-#' @param rho_prime Function. Success probability \eqn{\rho(t) = \mathrm{P}(Y=1\,|\, X^\top \beta = t)}
+#' @param rho_prime Function. Success probability \eqn{\rho'(t) = \mathrm{P}(Y=1\,|\, X^\top \beta = t)}
 #' @param beta0 Numeric. Intercept value.
 #' @param gamma0 Numeric. Signal strength.
 #' @param kappa Numeric. Problem dimension on the phase transition curve.

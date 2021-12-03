@@ -8,15 +8,15 @@
 #' Following is the formula of the four equations:
 #' \deqn{
 #'  \begin{dcases}
-#'  \sigma^2\kappa^2 & =\E{\rho'(S_1)(\lambda\rho'(\mathrm{prox}_{\lambda\rho}(-S_2)))^2+\rho'(-S_1)(\lambda\rho'(\mathrm{prox}_{\lambda\rho}(S_2)))^2}\\
-#'  \sigma \sqrt{\kappa}(1-\kappa) & =\E{\rho'(S_1)Z_2\mathrm{prox}_{\lambda\rho}(\lambda+S_2) + \rho'(-S_1)Z_2\mathrm{prox}_{\lambda\rho}(S_2)}\\
+#'  \sigma^2\kappa & =\E{\rho'(S_1)(\lambda\rho'(\mathrm{prox}_{\lambda\rho}(-S_2)))^2+\rho'(-S_1)(\lambda\rho'(\mathrm{prox}_{\lambda\rho}(S_2)))^2}\\
+#'  \sigma (1-\kappa) & =\E{\rho'(S_1)Z_2\mathrm{prox}_{\lambda\rho}(\lambda+S_2) + \rho'(-S_1)Z_2\mathrm{prox}_{\lambda\rho}(S_2)}\\
 #'  \gamma_0 \alpha & = \E{\rho'(S_1)Z_1\mathrm{prox}_{\lambda\rho}(\lambda+S_2) + \rho'(-S_1)Z_1\mathrm{prox}_{\lambda\rho}(S_2)},
 #'  0 & = \E{-\rho'(S_1)\rho'(\mathrm{prox}_{\lambda\rho}(-S_2)) + \rho'(-S_1)\rho'(\mathrm{prox}_{\lambda\rho}(S_2))}.
 #'  \end{dcases}
 #' }
 #' where \eqn{(Z_1, Z_2)\sim\mathcal{N}(0, I_2)} and
 #' \deqn{
-#'   S_1 = \gamma_0 Z_1 + \beta_0 ,\quad S_2 = \alpha \gamma_0 Z_1 + \sigma\sqrt{\kappa} Z_2 + b_0,
+#'   S_1 = \gamma_0 Z_1 + \beta_0 ,\quad S_2 = \alpha \gamma_0 Z_1 + \sigma Z_2 + b_0,
 #' }
 #' When the variables does not have an intercept term, then \eqn{b_0 = 0}.
 #' If the model does not have an intercept, then \eqn{\beta_0 = 0}.

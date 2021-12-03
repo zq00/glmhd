@@ -69,6 +69,6 @@ find_param <- function(rho_prime = rho_prime_logistic,
   sol <- fsolve(f_eq, x_init, J = NULL, maxiter = 100, tol = 1e-4, verbose)
   if(verbose) cat("Solution is", sol$x)
 
-  if(gamma == 0){c(1,sol$x)}else{sol$x}
+  if(gamma == 0){c(0,sol$x)}else{sol$x}
 }
 
