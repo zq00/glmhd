@@ -23,8 +23,10 @@
 #' }
 
 integrate2_normal <- function(f, ...){
-  integrand <- function(x) f(x) * dnorm(x[1]) * dnorm(x[2])
+  integrand <- function(x){
+    matrix(apply(x, 2, function(t) f(t) * exp(-sum(t^2) / 2) / 2 / pi), ncol = ncol(x))
+  }
 
-  hcubature(integrand, lowerLimit = c(-8,-8), upperLimit = c(8,8),
-                      fDim = 1, maxEval = 0, tol = 1e-4,  ...)$integral
+  hcubature(integrand, lowerLimit = c(-10,-10), upperLimit = c(10,10),
+            fDim = 1, maxEval = 0, absError = 0, vectorInterface = T)$integral
 }
