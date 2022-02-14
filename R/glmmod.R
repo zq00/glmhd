@@ -63,7 +63,7 @@ adjust_glm <- function(glm_output, verbose = FALSE, echo = TRUE, ...){
       mle_adj$fitted.values <- as.vector(glm_output$x %*% mle_adj$coef_adj)
     }
     mle_adj$call <- match.call()
-    class(mle_adj) <- "glmadj"
+    class(mle_adj) <- "glmhd_glmadj"
     return(mle_adj)
   }else{
     stop("Not binary regression!")
