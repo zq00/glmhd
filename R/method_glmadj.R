@@ -7,7 +7,6 @@
 #' @param ... Additional parameters
 #' @importFrom stats model.matrix printCoefmat
 #' @seealso \code{\link{adjust_glm}}
-#' @export
 
 print.glmadj <- function(x, ...){
   cat("Call:\n")
