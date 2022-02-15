@@ -66,8 +66,9 @@ find_param <- function(rho_prime = rho_prime_logistic,
     cat("Solve parameters for: kappa = ", kappa, ", gamma = ", gamma, ", beta0 = ", beta0, "\n")
     if(intercept == TRUE) cat(", with intercept. \n")
   }
-  sol <- fsolve(f_eq, x_init, J = NULL, maxiter = 100, tol = 1e-4, verbose)
+  sol <- fsolve(f_eq, x_init, J = NULL, maxiter = 200, tol = 1e-5, verbose)
   if(verbose) cat("Solution is", sol$x)
+  if(norm(f_eq(sol$x), type = "f") > 1e-3) warning("Equations evaluated at solution > 0.001. The solution may not be accurate! ")
 
   if(gamma == 0){c(0,sol$x)}else{sol$x}
 }
