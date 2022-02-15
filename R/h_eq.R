@@ -44,11 +44,13 @@
 
 solve_kappa <- function(rho_prime, beta0, gamma0){
   h <- function(t){
-    f1 <- function(x) hinge(t[1] + t[2] * x[1] - x[2])^2 * rho_prime(beta0 + gamma0 * x[1])
-    f2 <- function(x) hinge(-t[1] - t[2] * x[1] - x[2])^2 * (1 - rho_prime(beta0 + gamma0 * x[1]))
+    f1 <- function(x) (hinge(t[1] + t[2] * x[1] - x[2]))^2 * rho_prime(beta0 + gamma0 * x[1])
+    f2 <- function(x) (hinge(-t[1] - t[2] * x[1] - x[2]))^2 * (1 - rho_prime(beta0 + gamma0 * x[1]))
     integrate2_normal(f1) + integrate2_normal(f2)
   }
-  optim(par=c(0, 0), h, method='L-BFGS-B')$val
+
+  opt <- optim(par=c(0,0), h, method = "BFGS", control = list(abstol = 1e-5, maxit = 200))
+  return(list(conv = opt$convergence, val = opt$val))
 }
 
 #' @rdname solve_kappa
