@@ -36,7 +36,7 @@
 equation_binary <- function(rho_prime, f_prime1, f_prime0, kappa, gamma, beta0, intercept = TRUE){
   function(param, verbose){
     if(gamma == 0) {
-      alpha <-  0; lambda <-  param[1]; sigma <-  param[2];
+      alpha <-  1; lambda <-  param[1]; sigma <-  param[2];
       if(intercept == 0){
         b <-  0
         if(verbose) cat("lambda = ", lambda, ", sigma = ", sigma, "\n")
@@ -87,25 +87,25 @@ equation_binary <- function(rho_prime, f_prime1, f_prime0, kappa, gamma, beta0, 
       if(intercept == FALSE){
         c(
           sigma^2 * kappa - integrate2_normal(h1),
-          sigma * (1 - kappa) - integrate2_normal(h2)
+          sigma* (1 - kappa) - integrate2_normal(h2)
         )
       }else{
         c(
           sigma^2 * kappa - integrate2_normal(h1),
-          sigma * (1 - kappa) - integrate2_normal(h2),
+          sigma* (1 - kappa) - integrate2_normal(h2),
           integrate2_normal(h4_1) + integrate2_normal(h4_2)
         )
       }
     }else if(intercept == FALSE){
       c(
         sigma^2 * kappa - integrate2_normal(h1),
-        sigma * (1 - kappa) - integrate2_normal(h2),
+        sigma* (1 - kappa) - integrate2_normal(h2),
         gamma * alpha - integrate2_normal(h3)
       )
     }else{
       c(
         sigma^2 * kappa - integrate2_normal(h1),
-        sigma * (1 - kappa) - integrate2_normal(h2),
+        sigma* (1 - kappa) - integrate2_normal(h2),
         gamma * alpha - integrate2_normal(h3),
         integrate2_normal(h4_1) + integrate2_normal(h4_2)
       )
