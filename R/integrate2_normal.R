@@ -27,6 +27,6 @@ integrate2_normal <- function(f, ...){
     matrix(apply(x, 2, function(t) f(t) * exp(-sum(t^2) / 2) / 2 / pi), ncol = ncol(x))
   }
 
-  hcubature(integrand, lowerLimit = c(-10,-10), upperLimit = c(10,10),
+  pcubature(integrand, lowerLimit = c(-10,-10), upperLimit = c(10,10),
             fDim = 1, maxEval = 0, absError = 0, vectorInterface = T)$integral
 }
