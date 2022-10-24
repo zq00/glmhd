@@ -7,7 +7,8 @@
 get_simulate_fun(family)
 }
 \arguments{
-\item{family}{A family object, it contains a GLM family \code{family} and an inverse link function \code{linkinv}}
+\item{family}{A family object, it contains a GLM family \code{family} and an inverse link function \code{linkinv}.
+Currently supports binomial and Poisson families.}
 }
 \value{
 simulate_fun a function which takes a vector of linear predictors as inputs
