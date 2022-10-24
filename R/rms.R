@@ -1,1 +1,0 @@
-rms <- function(t) sqrt(sum(t^2) / length(t))
