@@ -39,6 +39,7 @@ Collate:
     'separable_proportion.R'
     'probe_frontier.R'
     'adjust_binary.R'
+    'bootglm.R'
     'integrate2_normal.R'
     'prox_op.R'
     'equation_binary.R'
