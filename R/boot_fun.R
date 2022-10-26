@@ -1,11 +1,19 @@
-# bootstrap routine
-# generates one parametric bootstrap sample according to the coefficients and glm family given
-#     and computes the MLE
-# Input: X - covariate matrix 
-#     beta - coefficients
-#     family - family object for the glm
-#     sloe - TRUE if use SLOE to estimate eta
-# Output: MLE coefficients
+#' Compute one bootstrap sample
+#' 
+#' Generates one parametric bootstrap sample given GLM family and model coefficients
+#' 
+#' @param X A n*p covariate matrix (each row represents one obs.)
+#' @param beta Model coefficient
+#' @param family GLM family
+#' @param sloe If True, use SLOE to estimate \eqn{\eta = \var(X_{\mathrm{new}^\top \hat{\beta}})^{1/2}} (see the function \code{estimate_eta})
+#' 
+#' @return 
+#' \describe{
+#' \item{coef}{A length p vector of MLE coefficients.}
+#' \item{eta_hat}{If \code{sloe = T}, returns the estimated \eqn{\hat{\eta}}.}
+#' }
+#' @export
+
 boot_fun <- function(X, beta, family, sloe = F){
   Y <- family$simulate_fun(X%*%beta)
   fit <- tryCatch(error = function(e) {cat("E! "); return(-1)},
