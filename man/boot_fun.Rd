@@ -2,7 +2,7 @@
 % Please edit documentation in R/boot_fun.R
 \name{boot_fun}
 \alias{boot_fun}
-\title{Compute one bootstrap sample}
+\title{Compute one bootstrap for a GLM}
 \usage{
 boot_fun(X, beta, family, sloe = F)
 }
