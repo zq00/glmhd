@@ -1,4 +1,4 @@
-#' Compute one bootstrap sample
+#' Compute one bootstrap for a GLM
 #' 
 #' Generates one parametric bootstrap sample given GLM family and model coefficients
 #' 
