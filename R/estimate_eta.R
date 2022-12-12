@@ -1,6 +1,6 @@
 #' Estimate eta from MLE coef.
 #' 
-#' Use an extension of the SLOE estimator to estimate \eqn{\eta = \var(X_{\mathrm{new}}^\top \hat{\beta})^2},
+#' Use an extension of the SLOE estimator to estimate \eqn{\eta = \var(X_{\mathrm{new}}^\top \hat{\beta})^{1/2}},
 #' where \eqn{X_{\mathrm{new}}} is a new obs. and \eqn{\hat{\beta}} is the MLE.
 #' 
 #' Let \eqn{f_y(t)} be the negative log-likelihood when the response is \eqn{y} and linear predictor is \eqn{t}.
