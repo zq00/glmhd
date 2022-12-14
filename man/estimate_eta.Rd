@@ -19,7 +19,7 @@ estimate_eta(X, y, beta_hat, family)
 A numeric value of the estimated \eqn{\hat{\eta}}.
 }
 \description{
-Use an extension of the SLOE estimator to estimate \eqn{\eta = \var(X_{\mathrm{new}}^\top \hat{\beta})^2},
+Use an extension of the SLOE estimator to estimate \eqn{\eta = \var(X_{\mathrm{new}}^\top \hat{\beta})^{1/2}},
 where \eqn{X_{\mathrm{new}}} is a new obs. and \eqn{\hat{\beta}} is the MLE.
 }
 \details{
