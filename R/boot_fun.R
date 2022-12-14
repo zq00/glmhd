@@ -15,6 +15,7 @@
 #' @export
 
 boot_fun <- function(X, beta, family, sloe = F){
+  family$simulate_fun <- get_simulate_fun(family)
   Y <- family$simulate_fun(X%*%beta)
   fit <- tryCatch(error = function(e) {cat("E! "); return(-1)},
                   glm(Y ~ X + 0, family = family))
