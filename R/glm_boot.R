@@ -38,22 +38,22 @@ glm_boot <- function(glm_fit, s_interval = 0.02, b_var = 5, b_boot = 100, robust
   rms <- function(t) sqrt(sum(t^2) / length(t))
   eta_hat <- matrix(0, ns, b_var); i <- 0
   for(s in s_seq){ 
-    new_val <- estimate_variance(X, Y, beta_hat * s, family, b_var)
+    new_val <- estimate_variance(X, beta_hat * s, family, b_var)
   
     if((is.numeric(new_val) && new_val == -1) || mean(new_val) > 1.5 * eta_obs) break; # stop criteria
     i <- i+1; eta_hat[i, ] <- new_val
     if(verbose){if(i %% 2 == 0){cat(s_seq[i], "\t Estimated std is ", mean(eta_hat[i, ]),"\n") }}
   }
   if(i == 1) {s <- 0;sol <- list(gamma_hat = 0);}else{
-    s_seq <- s_seq[1:i]; sd_hat <- sd_hat[1:i, ]
+    s_seq <- s_seq[1:i]; eta_hat <- eta_hat[1:i, ]
     # find solutions s_seq, eta_hat, eta_obs, sd_obs, verbose = T, filename = NULL
-    sol <- estimate_gamma( s_seq, eta_hat, eta_obs, rms(X%*% beta_hat), verbose = verbose, filename = filename)
+    sol <- estimate_gamma( s_seq, eta_hat, eta_obs, sd(X%*% beta_hat), verbose = verbose, filename = filename)
     s_hat <- sol$s_hat
     beta_s <- beta_hat * s_hat; 
     if(verbose){cat("Estimated gamma is", sol$gamma_hat , "\n")}}
   
   # 3. Using bootstrap to estimate the bias and variance
-  mle_boot <- boot(X, beta_s, family, b_boot, verbose)
+  mle_boot <- bootglm(X, beta_s, family, b_boot, verbose)
   
   # 4. estimate alpha and sigma
   if(robust_est){
