@@ -27,7 +27,7 @@
 #'@export
 estimate_eta <- function(X, y, beta_hat, family){
   if(family$family == "binomial") y <- 2 * y - 1
-  f <- getg(family)
+  f <- compute_deriv(family)
   g <- f$g
   gprime <- f$gprime
   
