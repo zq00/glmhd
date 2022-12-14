@@ -20,7 +20,7 @@
 #' @param s_seq A sequence of shrinkage factors s
 #' @param eta_hat A matrix. The number of rows is equal to the length of s_seq, the number of columns is equal to the number of parametric bootstrap samples at each s
 #' @param eta_obs \eqn{\hat{\eta}} computed using observed samples
-#' @param sd_obs Observed standard devaition of the linear predictors evaluated at \eqn{\hat{\beta}}, i.e., \eqn{sd(x_i^\top \hat{\beta})}
+#' @param sd_obs Observed standard deviation of the linear predictors evaluated at \eqn{\hat{\beta}}, i.e., \eqn{sd(x_i^\top \hat{\beta})}
 #' @param verbose Plot \eqn{\hat{\eta}(s)} versus shrinkage factors \eqn{s} if \code{TRUE}.
 #' @param filename If a file name is provided, then save the plot of \eqn{\hat{\eta}(s)} versus shrinkage factors \eqn{s} to \code{filename}
 
@@ -32,7 +32,7 @@
 #' \item{gamma_hat}{A numeric value of the estimated signal strength \eqn{\gamma = \var(X^\top \beta)^{1/2}}}
 #' }
 #' @export
-estimate_gamma <- function(s_seq, eta_hat, eta_obs, sd_obs, verbose = T, filename = NULL){
+estimate_gamma <- function(s_seq, eta_hat, eta_obs, sd_obs, verbose = T, filename = NA){
   # fit a smooth loess curve 
   data <- data.frame(cbind(rep(s_seq, time = ncol(eta_hat)), as.vector(eta_hat)))
   colnames(data) <- c("s", "val")
