@@ -6,7 +6,7 @@
 #' 
 #' @param X A covariate matrix of size n * p.
 #' @param beta A vector of length n. Coefficients where the parametric bootstrap is applied.
-#' @param family An object of class family
+#' @param family An object of class family 
 #' @param b_boot An integer of number of bootstrap samples
 #' @param verbose Print progress if T
 #' 
@@ -14,6 +14,8 @@
 #' Returns error if the bootstrap MLE does not exist more than 20% of times.
 #' @export
 bootglm <- function(X, beta, family, b_boot, verbose){
+  family$simulate_fun <- glmhd::get_simulate_fun(family) # a function to simulate Y from the linear predictor
+
   p <- ncol(X)
   b <- 0; nerror <- 0 # b counts bootstrap samples; nerror counts number of times the MLE does not exist
   mle_boot <- matrix(0, p, b_boot) # stores the bootstrap samples
