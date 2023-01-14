@@ -3,6 +3,7 @@
 #' Estimates the MLE distribution of a GLM using the resized bootstrap method
 #' 
 #' @param glm_fit A glm object returned by [stats:glm] function. It should contain the covariats x and responses y, i.e., the output of glm(.., x = T, y = T)
+#' @param simulate_fun A function to simulate new responses (the inputs are an observation matrix and a vector of coefficients)
 #' @param s_interval A numeric value of increment of the sequence of shrinkage factors \eqn{s}. If \eqn{s_interval = 0.2}, then the 
 #'   list of shrinkage factors would be \eqn{(0, 0.2, 0.4, ..., 1)}. 
 #' @param b_var A numeric value of the number of parametric bootstrap samples at each s to estimate signal strength parameter \eqn{\gamma}
@@ -12,6 +13,7 @@
 #' @param verbose Print progress if \code{TRUE}.
 #' @return 
 #' \describe{
+#' \item{glm_fit}{The input GLM object.}
 #' \item{beta_s}{\eqn{\beta_s = s_\star\cdot \hat{\beta}} satisfies \eqn{\var(X^\top \beta_s)\approx \gamma^2}}
 #' \item{gamma_hat}{The estimated signal strength parameter \eqn{\gamma}}
 #' \item{alpha}{A numeric value of the estimated inflation of the MLE, i.e., \eqn{\hat{\beta}/\alpha} is approximately unbiased of the true model coef. }
@@ -20,10 +22,15 @@
 #' }
 #' @importFrom robustbase Qn 
 #' @export
-glm_boot <- function(glm_fit, s_interval = 0.02, b_var = 5, b_boot = 100, robust_est = FALSE, verbose = TRUE, filename = NA){
+glm_boot <- function(glm_fit, simulate_fun = NULL, s_interval = 0.02, b_var = 5, b_boot = 100, robust_est = FALSE, verbose = TRUE, filename = NA){
   # 1. extract data and MLE
   family <- glm_fit$family # family and link 
-  family$simulate_fun <- get_simulate_fun(family) # a function to simulate Y from the linear predictor
+  if(is.null(simulate_fun)){
+    family$simulate_fun <- get_simulate_fun(family)
+  }else{
+    family$simulate_fun <- simulate_fun
+  }
+  
   X <- glm_fit$x; Y <- glm_fit$y # covariate matrix contains a first column of 1s if the model contains an intercept
   n <- nrow(X); p <- ncol(X) 
   beta_hat <- glm_fit$coef
@@ -74,6 +81,6 @@ glm_boot <- function(glm_fit, s_interval = 0.02, b_var = 5, b_boot = 100, robust
     alpha_boot <- lm(mean_ap ~ beta_s + 0, weights = 1/sd_boot^2)$coef
   }
   
-  return(list(beta_s = beta_s, gamma_hat = sol$gamma_hat, beta_b = mean_ap, alpha = alpha_boot, sd = sd_boot, boot_sample = mle_boot))
+  return(list(glm_fit = glm_fit, beta_s = beta_s, gamma_hat = sol$gamma_hat, beta_b = mean_ap, alpha = alpha_boot, sd = sd_boot, boot_sample = mle_boot))
 }
 
