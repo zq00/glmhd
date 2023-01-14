@@ -14,8 +14,6 @@
 #' Returns error if the bootstrap MLE does not exist more than 20% of times.
 #' @export
 bootglm <- function(X, beta, family, b_boot, verbose){
-  family$simulate_fun <- glmhd::get_simulate_fun(family) # a function to simulate Y from the linear predictor
-
   p <- ncol(X)
   b <- 0; nerror <- 0 # b counts bootstrap samples; nerror counts number of times the MLE does not exist
   mle_boot <- matrix(0, p, b_boot) # stores the bootstrap samples
