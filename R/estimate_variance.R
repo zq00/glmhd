@@ -18,7 +18,7 @@ estimate_variance <- function(x, beta, family, b_var){
   nerror <- 0; b <- 0 
   eta_hat <- numeric(b_var) # stores the estimated eta_hat in each bootstrap sample
   while(b < b_var){
-    beta_hat_new <- boot_fun(x, beta, family, sloe = T) # Use SLOE to estimate eta
+    beta_hat_new <- boot_fun(x, beta, family,sloe = T) # Use SLOE to estimate eta
     if(is.numeric(beta_hat_new) && beta_hat_new == -1) {
       nerror <- nerror + 1; # error in fitting a GLM
       if(nerror > 0.5 * b_var) {return(-1)}
