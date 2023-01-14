@@ -1,0 +1,311 @@
+---
+title: "A resized bootstrap method for high-dimensional GLMs"
+author: "Qian Zhao"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE, 
+  warning = FALSE, 
+  fig.align = "center", 
+  fig.width = 5,
+  fig.height = 4
+)
+```
+
+```{r, include = FALSE}
+library(ggplot2)
+library(purrr)
+devtools::load_all("/Users/zq/Documents/GitHub/glmhd")
+```
+
+In this vignette, we describe how to estimate the distribution of the M-estimate of a high-dimensional logistic regression using the resized bootstrap method. We will start with the assumption that $Y|X$ is indeed from a logistic model. At the end of this vignette, we will describe how to modify the bootstrap procedure when the model assumption is incorrect. 
+
+## Warm-up: non-Gaussian covariates 
+
+We have seen in the previous vignette that if the covariates $X_i$ are multivariate Gaussian, then the high-dimensional theory accurately describes the MLE distribution when the sample size is moderately large. What if $X_i$ are **not** from a Gaussian distribution? 
+
+As an example, let's simulate a logistic model where $X_i$ are from a multivariate *t*-distribution. We denote a random vector from a  multivariate *t*-distribution as $X\sim t_{\nu}(\mu,\Sigma)$, and it can be represented as
+
+$$
+X = \frac{\mathcal{N}(\mu,\Sigma)}{\sqrt{\chi^2_\nu/\nu}},
+$$
+where the Gaussian and the $\chi^2_\nu$ variables are independent of each other (see the [Wikipedia page](https://en.wikipedia.org/wiki/Multivariate_t-distribution)). 
+
+We generate $Y |X$ from a logistic model. The following function generates one set of observations $(X, Y)$, fits a logistic regression, and reports the MLE and the std.dev. of the MLE estimated by the classical theory (computed within the `glm` function).  
+
+```{r}
+# Function to sample obs. from a logistic model and return the fitted MLE and estimated std.dev from the glm function
+# INPUT: 
+#     n - number of observations 
+#     beta - coefficient vector
+#     R - Cholesky decomposition of the covariance matrix (R^t R) of Sigma
+#     nu - the degree of freedom of the MVT distribution
+# OUTPUT:
+# A vector of length (2*p) which are the estimated MLE and the std.dev of each coordinate 
+sample_logistic <- function(n, beta, R, nu){
+  p <- length(beta) # number of variables
+  # Sample X
+  chi <- rchisq(n, df = nu) / (nu - 2)
+  X <- matrix(rnorm(n * p, 0, 1), n, p) %*%  R / sqrt(chi) / sqrt(n)
+  # Sample Y from a logistic model 
+  Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
+  # Logistic regression 
+  fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
+  # Returns the fitted coefficients and their standard error estimates
+  c(fit$coef, summary(fit)$coef[,2])
+}
+```
+
+In this example, I pick $n=1000$, $p = 200$ (the problem dimension is $\kappa = p/n = 0.2$) and set $X\sim t_8(0,\Sigma)$, where $\Sigma$ is a circulant matrix $\Sigma_{i,j} = 0.5^{\min(|i-j|, p+1-|i-j|)}$. I standardize each variable to have zero mean and variance equal to $1/n$. For simplicity, half of the variables are sampled to be non-nulls and the effect size are $\pm 4$ (half of the non-nulls are equal to 4 and the other half are equal to $-4$). I initialize a pseudorandom number generator to make sure that I get the same result every time.
+
+```{r, set_seed}
+set.seed(2) 
+```
+
+```{r, sim_setup}
+n <- 1000 
+p <- 200 
+kappa <- p/n
+
+nu <- 8
+rho <- 0.5
+x <- rho^(c(0:(p/2), (p/2-1):1))
+Sigma <- toeplitz(x)
+R <- chol(Sigma)
+
+ind <- sample(1:p, p,replace = F)
+null <- ind[1:(p/2)]
+nonnull <- ind[(p/2+1):p]
+beta <- numeric(p)
+beta[nonnull[1:(p/4)]] <- 4; beta[nonnull[(p/4 + 1):(p/2)]] <- -4
+```
+
+I now repeat the simulation $200$ times and compute the mean and std.dev of the MLE.
+
+```{r run_simulation}
+B <- 200
+results <- replicate(B, sample_logistic(n, beta, R, nu))
+beta_hat <- results[1:p, ] # p by B MLE matrix
+std_hat <- results[(p+1):(2*p), ] # p by B matrix of the estimated std.dev. 
+j <- nonnull[1] # focus on one coordinate
+betahatj <- rbind(beta_hat[j,], std_hat[j,]) 
+```
+
+### Comparing empirial inflation and std.dev. with classical theory estimates
+
+First, we examine the empirical inflation and std.dev. of the MLE and compare with the classical theory estimates. 
+
+The mean of the MLE is `r round(mean(betahatj[1,]), 2)`, i.e., it is inflated by a factor of `r round(mean(betahatj[1,])/4,  2)`. The empirical std.dev is `r round(sd(betahatj[1,]), 2)`. In comparison, the classical theory estimate is on average `r round(mean(betahatj[2,]),2)` which is `r round((sd(betahatj[1,]) - mean(betahatj[2,])) / sd(betahatj[1,]) *100, 2)`\% smaller than the empirical std. dev. The classical theory assumes that $p$ is fixed or $p/n\to 0$ and in this classical setting the MLE is unbiased, which is not the case when the size of $p/n$ is not negligible.  
+
+We plot a histogram of the empirical MLE distribution and overlay on top a Gaussian density curve at the empirical mean and std.dev, from which we observed that the MLE is approximately Gaussian.
+
+```{r histogram, echo = F}
+par(mar = c(3,3,3,1), mgp = c(1.5, 0.5, 0))
+# plot fitted coefficients
+hist(betahatj[1,], breaks = 15, freq = FALSE, main = "", 
+     xlab = "Estimated coefficients", cex.lab = 1.5)
+mtext(expression(paste("Histogram of ",hat(beta)[j])), line = 1, cex = 1.5 )
+mtext(expression(paste(beta[p], "=4 (black line)")), line = 0)
+# theoretical density curve of beta_hat 
+lines(t <-  seq(-10, 25, by = 0.01), dnorm(t, round(mean(betahatj[1,]), 2), round(sd(betahatj[1,]), 2) ), col = "blue", lwd = 1.5)
+abline(v = 4, col = "black", lwd = 2)
+```
+
+### The high-dimensional theory
+
+Next, we use the high-dimensional theory to estimate the inflation and std.dev. According to the high-dimensional theory, the MLE distribution depends on two parameters: problem dimension $\kappa = p/n$ and signal strength $\gamma$ defined as 
+\[
+\gamma^2= \var(X^\top \beta) = \frac{1}{n}\beta^\top \Sigma \beta.
+\]
+
+The MLE is approximately Gaussian with mean $\alpha_\star \beta_j$ and std.dev. equal to $\sigma_\star / \tau_j$ where $\tau_j^2 = \mathrm{Var}(X_j|X_{-j})$.
+
+```{r}
+# signal strength in this example
+gamma <- sqrt(t(beta) %*% (Sigma %*% beta) / n)[1,1]
+```
+
+
+```{r, echo = F}
+params <- find_param(kappa = kappa, gamma = gamma)
+
+tau <- 1/sqrt(diag(solve(Sigma)))
+```
+
+The theoretical inflation is $\alpha_\star = $ `r params[1]` (which is quite close the empirical inflation) and the estimated standard deviation (`r params[3]/sqrt(kappa)/tau[j] `) is `r round((sd(betahatj[1,]) - params[3]/sqrt(kappa)/tau[j]) / sd(betahatj[1,]) *100, 2)`\% smaller than the empirical std. dev. smaller than the empirical standard deviation. This result implies that in this situation, the MLE distribution deviates from when covariates Gaussian. 
+
+Researchers have shown that the MLE distribution of a ridge-regularized regresion depends on the covariate distribution (see [1]), and we observe here that this is also true for a high-dimensional logistic regression.
+
+### The resized bootstrap method
+
+Finally, we illustrate how to use the resized bootstrap method introduced in [2] to estimate the MLE distribution. 
+
+First, we will sample a new observation and then estimate the MLE distribution using that observation.
+
+```{r onesample}
+chi <- rchisq(n, df = nu) / (nu - 2)
+X <- matrix(rnorm(n * p, 0, 1), n, p) %*%  R / sqrt(chi) / sqrt(n)
+# Sample response 
+Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
+# Logistic regression 
+fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
+```
+
+
+```{r resizedbootfit}
+resizedboot_fit <- glm_boot(fit, s_interval = 0.02, b_var = 5, b_boot = 1000, robust_est = FALSE, verbose = F, filename = NA)
+```
+
+You can access the estimated inflation and std.dev. through `resizedboot_fit$alpha` and `resizedboot_fit$sd` respectively. The estimated inflation is `r round(resizedboot_fit$alpha, 2)` and the estimated std.dev. is `r round(resizedboot_fit$sd[j], 2)` which is `r round((sd(betahatj[1,]) - resizedboot_fit$sd[j]) / sd(betahatj[1,]) *100, 2)`\% smaller than the empirical std.dev. 
+
+## How does the resized bootstrap work? 
+
+The resized bootstrap method deals with general, unknown covariate distribution by *conditioning* on the observed covariates $X$ and resample responses $Y$. Though we do not know the true coefficient $\beta$, we know from high-dimensional theory that the MLE distribution (for moderately large $\beta_j$) depends only on the signal strength parameter $\gamma$, and therefore we should choose $\beta_{\star}$ that satisfies
+
+$$
+\mathrm{Var}(X^\top \beta_\star)= \gamma^2.
+$$
+In particular, we choose $\beta_\star = s \hat{\beta}$ where $\hat{\beta}$ is the MLE and $s$ is a *shrinkage factor*. 
+
+Because $\gamma$ is not known to us in advance, we need to estimate $\gamma$ first, which we will discuss in the next section. For illustration, we first assume that $\gamma$ is known and thus we know how to choose $s$. 
+
+The shinkage factor is
+\[
+s^2 = \gamma^2 / \mathrm{Var}(X^\top \hat{\beta}) = \frac{\gamma}{\frac{1}{n} \hat{\beta}^\top \Sigma\hat{\beta} } 
+\]
+
+```{r shrinkage}
+s <- gamma / sqrt(t(fit$coef) %*% (Sigma %*% fit$coef) / n)[1,1]
+```
+
+The shrinkage factor is $s = $ `r round(s, 2)`. The resized MLE is $\beta_\star = s\times \hat{\beta}$. 
+
+```{r resizedMLE}
+betas <- s * fit$coef
+```
+
+After we compute the resized MLE, we generate bootstrap samples by re-sampling $Y$ while fixing the observed covariates and coefficients at the resized MLE $\beta_\star$. Finally, we use the bootstrap MLE to estimate the MLE distribution. 
+
+In the package, computing the bootstrap MLE is implemented by the `bootglm` function. This function does the following: (1) Generates parametric bootstrap samples, using `X` as the covariate and `beta` as coefficients. You need to specify how to simulate $Y$ given $X$ and $\beta$. The package pre-defines a few functions, and you can all the function `get_simulate_fun` for binary and Poisson regression. You can also define your own function to sample $Y$, and this is useful when the model and the loss functions are different. 
+
+```{r get_simulate_fun}
+fit$family$simulate_fun <- get_simulate_fun(fit$family) 
+```
+
+(2) Computes MLE for each bootstrap sample. `bootglm` outputs the bootstrap MLE (each column represents the MLE in one bootstrap sample).   
+
+```{r bootglm}
+bootfit <- bootglm(X = fit$x, beta =  betas, family = fit$family, b_boot  = 200, verbose = F) 
+```
+
+We use the std.dev of the bootstrap MLE to estimate the std.dev. of the MLE. The estimate is `r round(apply(bootfit, 1, sd)[j],2)` and its relative error (compared to the empirical std.dev) is `r round(abs(sd(betahatj[1,])- apply(bootfit, 1, sd)[j])/sd(betahatj[1,]) * 100, 2)`\% smaller than the empirical 
+
+```{r boot-sd}
+apply(bootfit, 1, sd)[j]
+```
+
+We estimate the inflation by regressing the average bootstrap MLE onto the resized MLE.  
+
+```{r boot-inflation}
+# estimated inflation using the bootstrap 
+lm(rowMeans(bootfit) ~ betas + 0, weights = 1/apply(bootfit, 1, sd)^2)$coef 
+```
+
+### Bootstrap confidence intervals 
+
+We now explain how to use the resized bootstrap method to construct CI for $\beta_j$. We consider two methods: Gaussian CI and bootstrap-t CI. 
+
+### Gaussian confidence intervals
+
+Suppose that $\hat{\beta}_j$ is approximately Gaussian, then the standardized MLE is approximately standard Gaussian, i.e., 
+
+$$
+\frac{\hat{\beta}_j - \hat{\alpha} \beta_j}{\hat{\sigma}_j}\approx \mathcal{N}(0,1),
+$$
+and a $(1-\alpha)$ level CI is 
+
+$$
+\left[\frac{1}{\hat{\alpha}}\left(\hat{\beta}_j - z_{1-\alpha/2} \hat{\sigma}_j, \hat{\beta}_j - z_{\alpha/2} \hat{\sigma}_j \right)\right],
+$$
+where $z_q$ is the $q$-th quantiles of a standard Gaussian. The following code is an example of how to compute the lower and upper bounds of $(1-\alpha)$ CI:
+
+```{r gaussian-ci}
+alpha <- 0.95
+lower_gaussian <- (fit$coef - qnorm(1-alpha/2) * resizedboot_fit$sd) / resizedboot_fit$alpha
+upper_gaussian <- (fit$coef - qnorm(1-alpha/2) * resizedboot_fit$sd) / resizedboot_fit$alpha
+```
+
+### Bootstrap-t confidence intervals 
+
+Suppose the MLE is not Gaussian, then we might use the bootstrap MLE to *approximate* the MLE distribution, e.g., we might hypothesize that 
+
+$$
+\frac{\hat{\beta}_j - \alpha \beta_j}{\sigma_j}\approx \frac{\hat{\beta}_j^b - \alpha \beta_{\star, j}}{\sigma_j},
+$$
+where $\hat{\beta}_j^b$ is the bootstrap MLE. Using this approximation, the $(1-\alpha)$ level CI is 
+
+$$
+\left[\frac{1}{\hat{\alpha}}\left(\hat{\beta}_j - t_j^b[1-\alpha/2]\hat{\sigma}_j\right), \frac{1}{\hat{\alpha}}\left(\hat{\beta}_j - t_j^b[\alpha/2]\hat{\sigma}_j\right)\right],
+$$
+where $t_j^b[q]$ is the $q$-th quantile of standardized bootstrap MLE. The following code computes the bootstrap $t$ confidence interval. 
+
+```{r t-ci}
+tval <- (t(resizedboot_fit$boot_sample) - resizedboot_fit$alpha * resizedboot_fit$beta_s) / resizedboot_fit$sd
+
+lower_t <- (fit$coef - apply(tval, 1, function(t) quantile(t, 1-alpha/2)) *  resizedboot_fit$sd) / resizedboot_fit$alpha
+upper_t <- (fit$coef - apply(tval, 1, function(t) quantile(t, alpha/2)) *  resizedboot_fit$sd) / resizedboot_fit$alpha
+```
+
+### Estimating the signal strength 
+
+In the last part of this vignette, we explain how to estimate the signal strength $\gamma$. The function `glm_boot` first estimates $\gamma$ and you can access the estimate through `resizedboot_fit$gamma_hat`. The idea is to use the relationship between $\gamma$ and $\eta = \mathrm{Var}(X^\top_{\mathrm{new}} \hat{\neta})$, where $X^\top_{\mathrm{new}}$ is a new observation. 
+
+First, we compute $\eta$ from the MLE.
+
+```{r}
+eta_obs <- estimate_eta(fit$x, fit$y, fit$coef, fit$family)
+```
+
+The observed $\hat{\eta}$ is `r eta_obs`. Next, we estimate $\hat{\eta}(s)$, i.e., $\eta$ when the model coefficients are $\beta_s = s\times\hat{\beta}$. We choose a sequence of shrinkage factors `s`, and at each `s`, we estimate $\hat{\eta}(s)$ by re-sampling $Y$ and computing the MLE. 
+
+```{r}
+s_seq <- seq(0, 1, by = 0.02)
+B <- 5 # repeat 5 times at each s
+eta_hat <- matrix(NA, length(s_seq), B)
+for(i in 1:length(s_seq)){
+  eta_hat[i, ] <- estimate_variance(fit$x, beta = s_seq[i] * fit$coef, fit$family, b_var = B)
+  cat(i,":" , eta_hat[i, ], "\n")
+}
+```
+
+Finall, we use `eta_obs` and `eta_hat` to estimate $\gamma$. 
+
+```{r}
+gammahat <- estimate_gamma(s_seq, eta_hat, eta_obs, sd_obs = sd(fit$x %*% fit$coef), verbose = T)
+```
+
+If you set `verbose = T`, `estimate_gamma` function also shows a plot. On the $x$-axis are the gamma values $\gamma_s = \mathrm{Var}(X^\top \beta_s$ where $\beta_s = s\times \hat{\beta}$, and on the $y$-axis are the estimated $\hat{\eta}(s)$ at each $s$. The black points are $\hat{\eta}(s)$ in each repetition and the black line is a LOESS curve of $\hat{\eta}(s)$ versus $s$ (which can be equivalently converted to $\gamma$). Finally, the horizontal line shows $\hat{\eta}$ in the observed sample. The estimated $\hat{\gamma}=s_\star \times \mathrm{sd}(X^\top \hat{\beta})$ where $s_\star$ is the $s$ value on the black curve that intersects the horizontal line. In this example, the estimated $\gamma = $ `r gammahat$gamma_hat`, whose relative error compared to the true $\gamma$ is `r round(abs(gammahat$gamma_hat - gamma)/gamma * 100, 2)`\%. 
+
+NOTE: Suppose the covariates are multivariate Gaussian, then we can use the  ProbeFrontier method to estimate $\gamma$. However, when the covariates are multivariate $t$-distribution, the estimated $\gamma$ using the ProbeFrontier is *smaller* than the true $\gamma$. 
+
+```{r}
+adjusted_fit <- adjust_binary(fit, verbose = T)
+```
+
+The estimated $\hat{\gamma}$ using the probe frontier method is `r adjusted_fit$gamma_hat`, whose relative error is `r round(abs(adjusted_fit$gamma_hat - gamma)/gamma * 100, 2)`\%. 
+
+
+
+
+
+

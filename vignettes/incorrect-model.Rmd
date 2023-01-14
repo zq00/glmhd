@@ -1,0 +1,300 @@
+---
+title: "Incorrect Model"
+author: "Qian Zhao"
+date: "2023-01-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.height = 5, fig.width = 4, fig.align = "center")
+library(tidyverse)
+```
+
+
+```{r load_package}
+devtools::load_all("/Users/zq/Documents/GitHub/glmhd")
+```
+
+
+We consider the situation when we use a different loss function than the negative log-likelihood. For example, when we fit a logistic regression when the $Y |X$ is from a  Probit model. Though it might not be feasible in reality, we assume that we know what the true model is. [1] 
+
+We will discuss two ways to estimate the distribution of the M-estimator. First, when the covariates are multivariate Gaussian, we can again apply the high-dimensional theory. Second, when the covariates are *not* Gaussian, we illustrate how to use the resized bootstrap method to estimate the distribution of the M-estimator. 
+
+## Gaussian covariates
+
+### A simulated example
+
+We first write a function to compute the MLE in one obs. and set up the model parameters.
+
+```{r}
+sample_gaussian_obs <- function(n, beta, R){
+  p <- length(beta) # number of variables
+  # Sample X
+  X <- matrix(rnorm(n * p, 0, 1), n, p) %*%  R / sqrt(n)
+  # Sample Y from a probit model 
+  Y <- rbinom(n, 1, pnorm(X %*% beta))
+  list(X = X, Y = Y)
+}
+
+fit_logistic <- function(X, Y){
+  # Logistic regression 
+  fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
+  # Returns the fitted coefficients and their standard error estimates
+  c(fit$coef, summary(fit)$coef[,2])
+}
+```
+
+
+```{r, set_seed}
+set.seed(2) 
+```
+
+
+```{r model_param}
+n <- 1000 
+p <- 200 
+kappa <- p/n
+
+nu <- 8
+rho <- 0.5
+x <- rho^(c(0:(p/2), (p/2-1):1))
+Sigma <- toeplitz(x)
+R <- chol(Sigma)
+
+ind <- sample(1:p, p,replace = F)
+null <- ind[1:(p/2)]
+nonnull <- ind[(p/2+1):p]
+beta <- numeric(p)
+beta[nonnull[1:(p/4)]] <- 4; beta[nonnull[(p/4 + 1):(p/2)]] <- -4
+```
+
+We repeat the simulation `100` times to compute the inflation and std.dev. of the M-estimators.
+
+```{r}
+one_sim_gaussian <- function(n, beta, R){
+  obs <-  sample_gaussian_obs(n, beta, R)
+  result <- fit_logistic(obs$X, obs$Y)
+  result
+}
+beta_hat <- replicate(100, one_sim_gaussian(n, beta, R))
+```
+
+We compute the inflation and std.dev of one coordinate.
+
+```{r, echo = F}
+# the matrix of the MLE
+mle <- beta_hat[1:p, ]
+sdR <- beta_hat[-(1:p), ]
+```
+
+```{r}
+j <- nonnull[1]
+# inflation 
+mean(mle[j, ]) / beta[j] 
+# std.dev
+sd(mle[j, ])
+```
+
+To illustrate the high-dimensional theory, we generate a new observation.
+
+```{r}
+obs <-  sample_gaussian_obs(n, beta, R)
+fit <- glm(obs$Y~obs$X + 0, family = binomial, x = T, y = T)
+```
+
+```{r}
+adjusted_fit <- adjust_binary(fit)
+```
+
+The estimated inflation and std.dev using the high-dimensional theory (assuming a logistic model) are `r round(adjusted_fit$param[1], 2)` and `r round(adjusted_fit$std_adj[j], 2)`. 
+
+### Using the high-dimensional theory
+
+When the loss function differs from the negative log-likelihood, we can no longer use `adjust_binary` function, because the function assumes that the loss is the negative log-likelihood. However, we can call the same functions to estimate the signal strength $\gamma$ and compute the inflation $\alpha_\star$ and the std.dev. $\sigma_\star$. What we need to specify are three functions corresponding to the model and the loss: 
+
+- $\rho'(t)$ This is the probability of $Y = 1 | X^\top \beta = t$, i.e. $\rho'(t) = \mathrm{Prob}(Y = 1 | X^\top \beta = t)$.  
+
+- $f'_1(t)$ This is the derivative of the loss function when $Y = 1$. For the logistic regression, $f'_1(t) = -1 / (1 + \exp(x))$.
+
+- $f'_0(t)$ This is the derivative of the loss function when $Y = 0$. For the logistic regression, $f'_0(t) = 1 / (1 + \exp(-x))$.
+
+Our first step is to define these three functions: 
+
+```{r define_fun}
+rho_prime <- function(t) pnorm(t)
+fprime_1 <- function(x) -1 / (1 + exp(x))
+fprime_0 <- function(x) 1 / (1 + exp(-x))
+```
+
+Next we use the ProbeFrontier method to estimate a problem dimension $\kappa_s$ above which the two classes become separable.
+
+```{r}
+kappa_s <- probe_frontier(obs$X, 2*obs$Y - 1, B = 3, eps = 0.001, verbose = FALSE)
+```
+
+Then, we would estimate the signal strength $\gamma$ using the function `signal_strength`. Here, we specify the function $\rho'(t)$. 
+
+```{r}
+gamma_hat <- signal_strength(rho_prime = rho_prime, kappa_hat = kappa_s) 
+```
+
+Finally, we solve a system of three nonlinear equations to obtain the parameters $(\alpha_\star,\sigma_\star,\lambda_\star)$. 
+
+```{r}
+params <- find_param(rho_prime = rho_prime, f_prime1 = fprime_1,
+                       f_prime0 = fprime_0,
+                       kappa = kappa,
+                       gamma = gamma_hat$gamma_hat)
+
+params[1] # inflation
+tau <- 1/sqrt(diag(solve(Sigma)))
+params[3]/sqrt(kappa)/tau[j] # std.dev.
+```
+
+This yields estimated inflation and std.dev `r round(params[1], 2)` and `r round(params[3]/sqrt(kappa)/tau[j], 2)`, which is much more accurate than if we use the incorrect model. 
+
+## Non-Gaussian covariates
+
+Suppose the covariates are not Gaussian, then the high-dimensional theory no longer applies. We can still apply the resized bootstrap method, however, we need to change is the function which we use to simulate new response variables --- instead of simulating from a logistic model it would now simulate from a Probit model.
+
+### A simulated example
+
+As an example of non Gaussian covariates, we simluate some of $X$ from a multivariate Gaussian distribution and the rest as *interactions* between variables.  
+
+We set $n=1000$ and $p=200$, the first half of the covariates are $\mathcal{N}(0,\Sigma)$ with the same circulant covariance matrix as before. The second half are interactions between variables. 
+
+```{r setting-nongaussian}
+nInt <- p / 2 # number of interaction terms
+
+# define covariance matrix
+rho <- 0.5
+x <- rho^(c(0:((p - nInt)/2), ((p - nInt)/2-1):1))
+SigmaSmall <- toeplitz(x) 
+R <- chol(SigmaSmall)
+
+# sample interaction terms
+indices <- matrix(sample(1:(p-nInt), 2000,replace = T), ncol = 2)
+indices <- t(apply(indices, 1, sort))
+indices <- unique(indices)[1:nInt, ]
+
+# sample model coefficients
+nonnull1 <- sample(1:p, 0.5 * p, replace = F)
+beta1 <- numeric(p)
+beta1[nonnull1] <- rnorm(length(nonnull1), 0, 0.1)
+```
+
+
+```{r sample-nongaussian}
+# function to sample one obs 
+sample_nongaussian_obs <- function(n, beta, R){
+  X <- matrix(rnorm(n* (p-nInt), 0, 1), n, (p-nInt)) 
+  X <- X %*% R
+  XInt <- apply(indices, 1, function(t) X[,t[1]] * X[,t[2]])
+  X <- cbind(X, XInt)
+  
+  # Sample Y from a probit model 
+  Y <- rbinom(n, 1, pnorm(X %*% beta))
+  list(X = X, Y = Y)
+}
+
+one_sim_nongaussian <- function(n, beta, R){
+  obs <-  sample_nongaussian_obs(n, beta, R)
+  result <- fit_logistic(obs$X, obs$Y)
+  result
+}
+```
+
+
+```{r mle-nongaussian}
+beta_hat <- replicate(100, one_sim_nongaussian(n, beta1, R))
+
+mle <- beta_hat[1:p, ] # MLE
+sdR <- beta_hat[-(1:p), ] # std.dev
+```
+
+```{r}
+j <- sort(beta1, decreasing = T, index.return = T)$ix[40]
+# inflation 
+mean(mle[j, ]) / beta1[j] 
+# std.dev
+sd(mle[j, ])
+```
+
+We observe an inflation of `r round(mean(mle[j, ]) / beta1[j] ,2)` and std.dev. of `r round(sd(mle[j, ]),2)`. We plot the average MLE versus the true coefficients for every variable. The plot suggests that the inflations of the MLE are similar to each other and the overall inflation is about `r round(lm(rowMeans(mle)~beta1)$coef[2], 2)`. 
+
+
+```{r echo = F}
+ggplot() + 
+  geom_point(aes(x = beta1, y =  rowMeans(mle))) + 
+  geom_abline(slope = lm(rowMeans(mle)~beta1)$coef[2], intercept =  0 ) + 
+  theme_bw() + 
+  xlab("beta") + 
+  ylab("Average MLE") + 
+  theme(text = element_text(size = 15))
+```
+
+#### Using the high-dimensional theory
+
+Before we use the resized bootstrap method, we apply the high-dimensional theory as before and compare the theoretical inflation and std.dev. 
+
+```{r one-nongaussian-obs}
+obs <-  sample_nongaussian_obs(n, beta1, R)
+fit <- glm(obs$Y~obs$X + 0, family = binomial, x = T, y = T)
+```
+
+```{r}
+kappa_s <- probe_frontier(obs$X, 2*obs$Y - 1, B = 3, eps = 0.001, verbose = FALSE)
+gamma_hat <- signal_strength(rho_prime = rho_prime, kappa_hat = kappa_s) 
+params <- find_param(rho_prime = rho_prime, f_prime1 = fprime_1,
+                       f_prime0 = fprime_0,
+                       kappa = kappa,
+                       gamma = gamma_hat$gamma_hat)
+```
+
+```{r re-estimate-sigma}
+# Estimate covariance matrix because X is not Gaussian
+X <- sample_nongaussian_obs(10000, beta1, R)$X
+Sigma <- t(X) %*% X / 10000
+```
+
+Finally, we solve a system of three nonlinear equations to obtain the parameters $(\alpha_\star,\sigma_\star,\lambda_\star)$. 
+
+```{r}
+params[1] # inflation
+tau <- 1/sqrt(diag(solve(Sigma)))
+params[3]/sqrt(kappa)/tau[j]/sqrt(n) # std.dev.
+```
+
+Both the estimated inflation and std.dev. are quite accurate. Compared to the observed std.dev., the relative error of the theoretical estimate is `r round(abs(params[3]/sqrt(kappa)/tau[j]/sqrt(n) - sd(mle[j, ])) / sd(mle[j, ]), 3)* 100`\%. The relative error (averaged over all of the coordinates) is `r round(mean(abs(params[3]/sqrt(kappa)/tau/sqrt(n) - apply(mle, 1, sd))/apply(mle, 1, sd)), 3) * 100`\%. 
+
+### The resized bootstrap method
+
+Finally, we illustrate how to use the resized bootstrap method to estimate the distribution of the M-estimator. Here, we need to define how to simulate the new observation $Y|X$. By default, the function `glm_boot` uses the family and link defined in the `glm` fit. Because $Y|X$ is from a Probit model, we define a new function to simulate $Y$
+
+```{r new-dim-fun}
+simulate_fun_probit <- function(X, beta){
+  t <- X %*% beta
+  probs <- pnorm(t)
+  rbinom(length(t), 1, probs)
+}
+```
+
+Then, we input `simulate_fun_probit` as a parameter in `glm_boot`.
+
+```{r}
+boot_fit <- glm_boot(fit, simulate_fun = simulate_fun_probit, s_interval = 0.02, b_var = 5, b_boot = 100)
+```
+
+The estimated inflation and std.dev. are `r round(boot_fit$alpha, 2)` and `r boot_fit$sd[j]`, which has relative error `r round((boot_fit$sd[j] - sd(mle[j, ]))/sd(mle[j, ]),3) * 100`\%. The relative error (averaged over all of the coordinates) is `r round(mean(abs(boot_fit$sd - apply(mle, 1, sd))/apply(mle, 1, sd)), 3) * 100`\%. In this example, the theoretical std.dev. is more accurate compared to using the bootstrap. On the other hand, if $X$ is from a multivariate $t$-distribution (try this!), then the resized bootstrap would provide a more accurate estimate of the std.dev.
+
+
+
+
+[1] Suppose we use a *incorrect* model to sample new responses, then the resized bootstrap method does **not** estimate the MLE distribution correctly. 
+
+
+
+
+
+
+
