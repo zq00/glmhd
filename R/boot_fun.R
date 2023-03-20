@@ -1,11 +1,16 @@
 #' Compute one bootstrap for a GLM
 #' 
-#' Generates one parametric bootstrap sample given GLM family and model coefficients
+#' Generates one parametric bootstrap sample given GLM family and model coefficients.
 #' 
-#' @param X A n*p covariate matrix (each row represents one obs.)
-#' @param beta Model coefficient
-#' @param family GLM family
-#' @param sloe If True, use SLOE to estimate \eqn{\eta = \var(X_{\mathrm{new}^\top \hat{\beta}})^{1/2}} (see the function \code{estimate_eta})
+#' This model does not fit an intercept. As a result, if you would like to fit an intercept,
+#' please include a column of 1 in the matrix X. 
+#' 
+#' @param X A n*p covariate matrix (each row represents one obs.).
+#' @param beta Model coefficient.
+#' @param family GLM family. Besides the usual definition of glm family (see [stats::family]), 
+#'   \code{family} should include an additional element \code{simulate_fun} (see [get_simulate_fun]).
+#' @param sloe If True, use SLOE to estimate \eqn{\eta = \var(X_{\mathrm{new}^\top \hat{\beta}})^{1/2}} 
+#'   (see the function \code{estimate_eta}).
 #' 
 #' @return 
 #' \describe{
