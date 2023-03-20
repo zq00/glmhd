@@ -7,11 +7,12 @@
 #' observed covariates and when the model coef. is \code{\beta}. 
 #' Use SLOE to estimate \eqn{\eta} in each bootstrap sample. 
 #' 
-#' @inheritParams estimate_eta
-#' @param beta A vector of true model coef. 
-#' @param b_var Numeric. Number of bootstrap replicates used to estimate \eqn{sd(X^\top \hat{\beta})}.
+#' @param x A covariate matrix of size n*p.
+#' @param beta A vector of true model coef. (used to sample \code{y})
+#' @param family A GLM family, with family and link. See also [compute_deriv()].
+#' @param b_var Numeric. Number of bootstrap samples
 #' @return A vector of length \code{b_var} of \eqn{\hat{\eta}} in each bootstrap sample. 
-#'   if the GLM function reports an error in more than 50% of times, then return -1. 
+#'   if the GLM function reports an error in more than 50% of times, then return -1 (which means the MLE may not exist at \eqn{\beta}). 
 #'   
 #' @export
 estimate_variance <- function(x, beta, family, b_var){
@@ -25,7 +26,7 @@ estimate_variance <- function(x, beta, family, b_var){
       next;
     }
     b <- b + 1; 
-    eta_hat[b] <- beta_hat_new$eta_hat # If we want to add other options of how to estimate eta, we can edit here
+    eta_hat[b] <- beta_hat_new$eta_hat 
   }
   
   return(eta_hat)
