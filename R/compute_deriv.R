@@ -1,4 +1,4 @@
-#' Compute the derivative of the negative log-likelihood 
+#' Derivative of the negative log-likelihood 
 #' 
 #' @description 
 #' Compute the derivative of the negative log-likelihood of a GLM w.r.t. the linear predictor
@@ -15,7 +15,7 @@
 #' This function uses *formula* of GLM likelihoods. Currently, it supports Poisson regression (log link) and binary regression 
 #' (with logit/probit link).
 #' 
-#' Consider a logistic regression, \eqn{f_y(t) = \log(1+e^{-yt})}, where \eqn{y = \pm 1}. Then
+#' For a logistic regression, \eqn{f_y(t) = \log(1+e^{-yt})}, where \eqn{y \in \pm 1}. Then
 #' \deqn{
 #' g(t) = \frac{-y}{1+e^{yt}},
 #' }
@@ -24,10 +24,10 @@
 #' g'(t) = \frac{1}{(1+e^{yt})(1+e^{-yt})}. 
 #' }
 #' 
-#' For a probit regression, \eqn{f_y(t) = \log(\Phi(yt))} where \eqn{\Phi(\cdot)} is the normal cdf.
+#' For a probit regression, \eqn{f_y(t) = -\log(\Phi(yt))} where \eqn{\Phi(\cdot)} is the normal cdf.
 #' Then,
 #' \deqn{
-#' g(t) = \frac{-y\phi(yt)}{\Phi(yt)},
+#' g(t) = -\frac{y\phi(yt)}{\Phi(yt)},
 #' }
 #' where \eqn{\phi} is the normal pdf, and 
 #' \deqn{
@@ -67,7 +67,7 @@ compute_deriv <- function(family){
         phiprime <- -(y * t)*exp(-t^2 / 2)/sqrt(2*pi)
         dnorm(y*t)^2 / pnorm(y * t)^2 - phiprime / pnorm(y*t)
       }
-    }else if(family$link == "cloglog"){
+    }else if(family$link == "cloglog"){ # not verified
       g <- function(y, t){
         n <- length(y)
         val <- numeric(n)
