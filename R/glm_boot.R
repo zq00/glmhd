@@ -2,23 +2,23 @@
 #' 
 #' Estimates the MLE distribution of a GLM using the resized bootstrap method
 #' 
-#' @param glm_fit A glm object returned by [stats:glm] function. It should contain the covariats x and responses y, i.e., the output of glm(.., x = T, y = T)
-#' @param simulate_fun A function to simulate new responses (the inputs are an observation matrix and a vector of coefficients)
+#' @param glm_fit A glm object returned by [stats:glm] function. It should contain the covariates x and responses y, i.e., the output of glm(.., x = T, y = T).
+#' @param simulate_fun A function to simulate new responses (the inputs are an observation matrix and a vector of coefficients).
 #' @param s_interval A numeric value of increment of the sequence of shrinkage factors \eqn{s}. If \eqn{s_interval = 0.2}, then the 
 #'   list of shrinkage factors would be \eqn{(0, 0.2, 0.4, ..., 1)}. 
-#' @param b_var A numeric value of the number of parametric bootstrap samples at each s to estimate signal strength parameter \eqn{\gamma}
-#' @param b_boot A numeric value of the number of bootstrap samples to estimate the bias and variance of the MLE
+#' @param b_var A numeric value of the number of parametric bootstrap samples at each s to estimate signal strength parameter \eqn{\gamma}.
+#' @param b_boot A numeric value of the number of bootstrap samples to estimate the bias and variance of the MLE.
 #' @param robust_est If \code{TRUE}, use robust estimator of the bias and std.dev.
-#' @param filename filename If a file name is provided, then save the plot of \eqn{\hat{\eta}(s)} versus shrinkage factors \eqn{s} to \code{filename}. (see also [estimate_gamma])
+#' @param filename filename If a file name is provided, then save the plot of \eqn{\hat{\eta}(s)} versus shrinkage factors \eqn{\gamma} to \code{filename} (see also [estimate_gamma]).
 #' @param verbose Print progress if \code{TRUE}.
 #' @return 
 #' \describe{
 #' \item{glm_fit}{The input GLM object.}
-#' \item{beta_s}{\eqn{\beta_s = s_\star\cdot \hat{\beta}} satisfies \eqn{\var(X^\top \beta_s)\approx \gamma^2}}
-#' \item{gamma_hat}{The estimated signal strength parameter \eqn{\gamma}}
+#' \item{beta_s}{\eqn{\beta_s = s_\star\cdot \hat{\beta}} satisfies \eqn{\var(X^\top \beta_s)\approx \gamma^2}.}
+#' \item{gamma_hat}{The estimated signal strength parameter \eqn{\gamma}.}
 #' \item{alpha}{A numeric value of the estimated inflation of the MLE, i.e., \eqn{\hat{\beta}/\alpha} is approximately unbiased of the true model coef. }
-#' \item{sd}{A numeric value of the estimated std.dev. of the MLE}
-#' \item{boot_sample}{A matrix of size \code{b_boot}*{p} (p is the number of variables) of the bootstrap MLE. }
+#' \item{sd}{A numeric value of the estimated std.dev. of the MLE.}
+#' \item{boot_sample}{A matrix of size {p}*\code{b_boot} (p is the number of variables) of the bootstrap MLE. }
 #' }
 #' @importFrom robustbase Qn 
 #' @export
@@ -42,7 +42,6 @@ glm_boot <- function(glm_fit, simulate_fun = NULL, s_interval = 0.02, b_var = 5,
     
   # Estimate eta_hat at a sequence of shrinkage factors
   s_seq <- seq(0, 1, by = s_interval); ns <- length(s_seq)
-  rms <- function(t) sqrt(sum(t^2) / length(t))
   eta_hat <- matrix(0, ns, b_var); i <- 0
   for(s in s_seq){ 
     new_val <- estimate_variance(X, beta_hat * s, family, b_var)
@@ -51,13 +50,14 @@ glm_boot <- function(glm_fit, simulate_fun = NULL, s_interval = 0.02, b_var = 5,
     i <- i+1; eta_hat[i, ] <- new_val
     if(verbose){if(i %% 2 == 0){cat(s_seq[i], "\t Estimated std is ", mean(eta_hat[i, ]),"\n") }}
   }
-  if(i == 1) {s <- 0;sol <- list(gamma_hat = 0);}else{
+  if(i == 1 || i == 0) {s <- 0; sol <- list(gamma_hat = 0, s_hat=0)}else{
     s_seq <- s_seq[1:i]; eta_hat <- eta_hat[1:i, ]
     # find solutions s_seq, eta_hat, eta_obs, sd_obs, verbose = T, filename = NULL
     sol <- estimate_gamma( s_seq, eta_hat, eta_obs, sd(X%*% beta_hat), verbose = verbose, filename = filename)
-    s_hat <- sol$s_hat
-    beta_s <- beta_hat * s_hat; 
-    if(verbose){cat("Estimated gamma is", sol$gamma_hat , "\n")}}
+  }
+  s_hat <- sol$s_hat
+  beta_s <- beta_hat * s_hat; 
+  if(verbose){cat("Estimated gamma is", sol$gamma_hat , "\n")}
   
   # 3. Using bootstrap to estimate the bias and variance
   mle_boot <- bootglm(X, beta_s, family, b_boot, verbose)
@@ -81,6 +81,6 @@ glm_boot <- function(glm_fit, simulate_fun = NULL, s_interval = 0.02, b_var = 5,
     alpha_boot <- lm(mean_ap ~ beta_s + 0, weights = 1/sd_boot^2)$coef
   }
   
-  return(list(glm_fit = glm_fit, beta_s = beta_s, gamma_hat = sol$gamma_hat, beta_b = mean_ap, alpha = alpha_boot, sd = sd_boot, boot_sample = mle_boot))
+  return(list(glm_fit = glm_fit, beta_s = beta_s, gamma_hat = sol$gamma_hat, alpha = alpha_boot, sd = sd_boot, boot_sample = mle_boot))
 }
 
