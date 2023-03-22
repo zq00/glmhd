@@ -3,14 +3,14 @@
 #' @param family A family object, it contains a GLM family \code{family} and an inverse link function \code{linkinv}.
 #'   Currently supports binomial and Poisson families. 
 #' 
-#' @return simulate_fun a function which takes as input a matrix of observations and a vector of beta as inputs
-#' and returns a vector of simulated responses given the covariate matrix and beta.
+#' @return simulate_fun a function which takes as input a covariate matrix X and a coefficient vector beta.
+#' and returns a vector containing simulated responses given X andbeta.
 #' 
 #' @export
 #' @examples
 #' family <-  binomial(link = "logit")
 #' fun <- get_simulate_fun(family)
-#' y <- fun(rnorm(10))
+#' y <- fun(X = matrix(rnorm(100, 0, 1), 10, 10), beta = rnorm(10))
 get_simulate_fun <- function(family){
   if(family$family == "binomial"){
     simulate_fun <- function(X, beta){
