@@ -4,8 +4,8 @@
 #' where \eqn{X_{\mathrm{new}}} is a new obs. and \eqn{\hat{\beta}} is the MLE.
 #' 
 #' Let \eqn{f_y(t)} be the negative log-likelihood when the response is \eqn{y} and linear predictor is \eqn{t}.
-#' Define \eqn{w_i = x_i^\top H^{-1}x_i} and \eqn{t_i \ x_i^\top \hat{\beta}}, where \eqn{x_i} is the i-th obs., and
-#' \eqn{H} is the Hessian of the negative log-likelihood evaluated at the MLE. Let
+#' Define \eqn{w_i = x_i^\top H^{-1}x_i} and \eqn{t_i = \ x_i^\top \hat{\beta}}, where \eqn{x_i} is the i-th obs., and
+#' \eqn{H} is the Hessian of the negative log-likelihood evaluated at the \eqn{\hat{\beta}}. Let
 #' \deqn{
 #' S_i = x_i^\top \hat{\beta} + q_i f'_{y_i}(t_i),
 #' }
@@ -18,9 +18,9 @@
 #' \hat{\eta}^2  = \frac{1}{n}\sum_{i=1}^n S_i^2 - \left(\frac{1}{n}\sum_{i=1}^n S_i\right)^2.
 #' }
 #'
-#'@param X A covariate matrix of size n*p
-#'@param y A vector of responses of length n
-#'@param beta_hat A vector of MLE (length p)
+#'@param X A covariate matrix of size n*p.
+#'@param y A vector of responses of length n.
+#'@param beta_hat The MLE vector of length p.
 #'@param family A GLM family, with family and link. See also [compute_deriv()].
 #'
 #'@return A numeric value of the estimated \eqn{\hat{\eta}}.
@@ -28,8 +28,8 @@
 estimate_eta <- function(X, y, beta_hat, family){
   if(family$family == "binomial") y <- 2 * y - 1
   f <- compute_deriv(family)
-  g <- f$g
-  gprime <- f$gprime
+  g <- f$g # the first derivative of f_y(t)
+  gprime <- f$gprime # the second derivative of f_y(t)
   
   eta_hat <- X %*% beta_hat
   D <- as.vector(gprime(y, eta_hat))
