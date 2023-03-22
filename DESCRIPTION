@@ -10,15 +10,15 @@ Authors@R:
 Description: This package estimates the inflation and variance of maximum likelihood estimators (MLE)
     of a generalized linear model (GLM). The estimates uses the high-dimensional asymptotics 
     assuming both sample size \eqn{n} and number of variables \eqn{p} goes to infinity. 
-    In this package, you can (1) use exact high-dimensional theory which assume that the variables are from 
+    In this package, you can estimate the distribution of the MLE using (1) the high-dimensional theory which assume that the variables are from 
     a multivariate Gaussian or sub-Gaussian distribution, or 
-    (2) use a resized bootstrap approximation which does not make distributional assumptions.
+    (2)  a resized bootstrap approximation which does not make distributional assumptions.
 URL: https://github.com/zq00/glmhd
 BugReports: https://github.com/zq00/glmhd/issues
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports:
     cubature (>= 2.0.4),
     ECOSolveR (>= 0.5.3),
