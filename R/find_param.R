@@ -17,6 +17,7 @@
 #' @param intercept If \code{TRUE}, the glm contains an intercept term.
 #'     \code{intercept = TRUE} by default.
 #' @param verbose If \code{TRUE}, print progress at each step.
+#' @param x_init Initial values for the parameters. 
 #' @return A vector solution to the system. When \code{gamma != 0} and \code{b !=0},
 #'     returns \eqn{(\alpha_\star, \lambda_\star, \sqrt{\kappa}\sigma_\star, b_\star)}.
 #'     When signal strength is zero (\code{gamma = 0}), returns the solution to the system with
@@ -47,18 +48,22 @@ find_param <- function(rho_prime = rho_prime_logistic,
                        gamma,
                        beta0 = 0,
                        intercept = TRUE,
-                       verbose = FALSE){
-  if(gamma == 0){ # case of no signal
-    if(intercept == FALSE){
-      x_init <- c(2, 2)
+                       verbose = FALSE, 
+                       x_init = NULL){
+  if(is.null(x_init)){
+    if(gamma == 0){ # case of no signal
+      if(intercept == FALSE){
+        x_init <- c(2, 2)
+      }else{
+        x_init <- c(2, 2, beta0)
+      }
+    }else if(intercept == FALSE){
+      x_init <- c(2, 2, 1 + gamma * 2)
     }else{
-      x_init <- c(2, 2, beta0)
+      x_init <- c(2, 2, 1 + gamma * 2, beta0)
     }
-  }else if(intercept == FALSE){
-    x_init <- c(2, 2, 1 + gamma * 2)
-  }else{
-    x_init <- c(2, 2, 1 + gamma * 2, beta0)
   }
+  
   # Setup system of equations
   f_eq <- equation_binary(rho_prime, f_prime1, f_prime0,
                           kappa, gamma, beta0, intercept)
