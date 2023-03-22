@@ -48,7 +48,7 @@ glm_boot <- function(glm_fit, simulate_fun = NULL, s_interval = 0.02, b_var = 5,
   
     if((is.numeric(new_val) && new_val == -1) || mean(new_val) > 1.5 * eta_obs) break; # stop criteria
     i <- i+1; eta_hat[i, ] <- new_val
-    if(verbose){if(i %% 2 == 0){cat(s_seq[i], "\t Estimated std is ", mean(eta_hat[i, ]),"\n") }}
+    if(verbose){if(i %% 2 == 0){cat(s_seq[i], "\t Estimated eta is ", mean(eta_hat[i, ]),"\n") }}
   }
   if(i == 1 || i == 0) {s <- 0; sol <- list(gamma_hat = 0, s_hat=0)}else{
     s_seq <- s_seq[1:i]; eta_hat <- eta_hat[1:i, ]
