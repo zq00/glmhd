@@ -7,11 +7,11 @@
 estimate_eta(X, y, beta_hat, family)
 }
 \arguments{
-\item{X}{A covariate matrix of size n*p}
+\item{X}{A covariate matrix of size n*p.}
 
-\item{y}{A vector of responses of length n}
+\item{y}{A vector of responses of length n.}
 
-\item{beta_hat}{A vector of MLE (length p)}
+\item{beta_hat}{The MLE vector of length p.}
 
 \item{family}{A GLM family, with family and link. See also [compute_deriv()].}
 }
@@ -24,8 +24,8 @@ where \eqn{X_{\mathrm{new}}} is a new obs. and \eqn{\hat{\beta}} is the MLE.
 }
 \details{
 Let \eqn{f_y(t)} be the negative log-likelihood when the response is \eqn{y} and linear predictor is \eqn{t}.
-Define \eqn{w_i = x_i^\top H^{-1}x_i} and \eqn{t_i \ x_i^\top \hat{\beta}}, where \eqn{x_i} is the i-th obs., and
-\eqn{H} is the Hessian of the negative log-likelihood evaluated at the MLE. Let
+Define \eqn{w_i = x_i^\top H^{-1}x_i} and \eqn{t_i = \ x_i^\top \hat{\beta}}, where \eqn{x_i} is the i-th obs., and
+\eqn{H} is the Hessian of the negative log-likelihood evaluated at the \eqn{\hat{\beta}}. Let
 \deqn{
 S_i = x_i^\top \hat{\beta} + q_i f'_{y_i}(t_i),
 }

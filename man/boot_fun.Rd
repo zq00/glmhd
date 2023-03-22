@@ -7,13 +7,15 @@
 boot_fun(X, beta, family, sloe = F)
 }
 \arguments{
-\item{X}{A n*p covariate matrix (each row represents one obs.)}
+\item{X}{A n*p covariate matrix (each row represents one obs.).}
 
-\item{beta}{Model coefficient}
+\item{beta}{Model coefficient.}
 
-\item{family}{GLM family}
+\item{family}{GLM family. Besides the usual definition of glm family (see [stats::family]), 
+\code{family} should include an additional element \code{simulate_fun} (see [get_simulate_fun]).}
 
-\item{sloe}{If True, use SLOE to estimate \eqn{\eta = \var(X_{\mathrm{new}^\top \hat{\beta}})^{1/2}} (see the function \code{estimate_eta})}
+\item{sloe}{If True, use SLOE to estimate \eqn{\eta = \var(X_{\mathrm{new}^\top \hat{\beta}})^{1/2}} 
+(see the function \code{estimate_eta}).}
 }
 \value{
 \describe{
@@ -22,5 +24,9 @@ boot_fun(X, beta, family, sloe = F)
 }
 }
 \description{
-Generates one parametric bootstrap sample given GLM family and model coefficients
+Generates one parametric bootstrap sample given GLM family and model coefficients.
+}
+\details{
+This model does not fit an intercept. As a result, if you would like to fit an intercept,
+please include a column of 1 in the matrix X.
 }

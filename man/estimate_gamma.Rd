@@ -4,27 +4,27 @@
 \alias{estimate_gamma}
 \title{Estimate the signal strength}
 \usage{
-estimate_gamma(s_seq, eta_hat, eta_obs, sd_obs, verbose = T, filename = NULL)
+estimate_gamma(s_seq, eta_hat, eta_obs, sd_obs, verbose = T, filename = NA)
 }
 \arguments{
-\item{s_seq}{A sequence of shrinkage factors s}
+\item{s_seq}{A sequence of shrinkage factors s.}
 
-\item{eta_hat}{A matrix. The number of rows is equal to the length of s_seq, the number of columns is equal to the number of parametric bootstrap samples at each s}
+\item{eta_hat}{A matrix. The number of rows is equal to the length of s_seq, the number of columns is equal to the number of parametric bootstrap samples at each s.}
 
-\item{eta_obs}{\eqn{\hat{\eta}} computed using observed samples}
+\item{eta_obs}{\eqn{\hat{\eta}} computed using observed samples.}
 
-\item{sd_obs}{Observed standard devaition of the linear predictors evaluated at \eqn{\hat{\beta}}, i.e., \eqn{sd(x_i^\top \hat{\beta})}}
+\item{sd_obs}{Observed standard deviation of the linear predictors evaluated at \eqn{\hat{\beta}}, i.e., \eqn{sd(x_i^\top \hat{\beta})}.}
 
-\item{verbose}{Plot \eqn{\hat{\eta}(s)} versus shrinkage factors \eqn{s} if \code{TRUE}.}
+\item{verbose}{Plot \eqn{\gamma} versus shrinkage factors \eqn{s} if \code{TRUE}.}
 
-\item{filename}{If a file name is provided, then save the plot of \eqn{\hat{\eta}(s)} versus shrinkage factors \eqn{s} to \code{filename}}
+\item{filename}{If a file name is provided, then save the plot of \eqn{\hat{\eta}(s)} versus \eqn{\gamma} to \code{filename}.}
 }
 \value{
 \describe{
 \item{s_hat}{A numeric value of the estimated shrinkage factor \eqn{s} that satisfies
-\eqn{s^2 \var(X^\top \hat{\beta}) = \gamma}.
+\eqn{\hat{s} \mathrm{sd}(X^\top \hat{\beta}) = \hat{\gamma}.}
 }
-\item{gamma_hat}{A numeric value of the estimated signal strength \eqn{\gamma = \var(X^\top \beta)^{1/2}}}
+\item{gamma_hat}{A numeric value of the estimated signal strength.}
 }
 }
 \description{
@@ -32,11 +32,11 @@ Estimating gamma using the SLOE estimator and parametric bootstrap
 }
 \details{
 We estimate \eqn{\gamma} by the standard deviation of \eqn{sd(x_i^\top \beta(s_{\star}))}, 
-  where \eqn{\beta(s_\star) = s_\star \cdot \hat{\beta}}. We use the relationship that if 
+  where \eqn{\beta(s_\star) = s_\star \cdot \hat{\beta}}. We use the following relationship: if 
   \eqn{sd(x_i^\top \beta(s_{\star}))\approx \gamma}, then \eqn{\hat{\eta}(s_\star) \approx \hat{\eta}}.
   In this equation, \eqn{\hat{\eta}} is the estimated \eqn{\hat{\eta}} from the observations,
   \eqn{\eta(s)} is \eqn{\eta} when the model coefficient is \eqn{\beta(s) = s\cdot\hat{\beta}}. We 
-  estimate \eqn{\eta(s)} by parametric bootstrap, fixing the covariates and setting the model 
+  estimate \eqn{\eta(s)} by parametric bootstrap, fixing the covariates at the observed values and setting the model 
   coefficients as \eqn{\beta(s)} (see [estimate_variance] on how to estimate \eqn{\eta(s)}). 
   
 We pick a sequence of shrinkage factors \eqn{s}, and then compute \eqn{\hat{\eta}(s)} for each of them.

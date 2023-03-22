@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_deriv.R
 \name{compute_deriv}
 \alias{compute_deriv}
-\title{Compute the derivative of the negative log-likelihood}
+\title{Derivative of the negative log-likelihood}
 \usage{
 compute_deriv(family)
 }
@@ -31,7 +31,7 @@ g'(t)=f''_y(t).
 This function uses *formula* of GLM likelihoods. Currently, it supports Poisson regression (log link) and binary regression 
 (with logit/probit link).
 
-Consider a logistic regression, \eqn{f_y(t) = \log(1+e^{-yt})}, where \eqn{y = \pm 1}. Then
+For a logistic regression, \eqn{f_y(t) = \log(1+e^{-yt})}, where \eqn{y \in \pm 1}. Then
 \deqn{
 g(t) = \frac{-y}{1+e^{yt}},
 }
@@ -40,10 +40,10 @@ and
 g'(t) = \frac{1}{(1+e^{yt})(1+e^{-yt})}. 
 }
 
-For a probit regression, \eqn{f_y(t) = \log(\Phi(yt))} where \eqn{\Phi(\cdot)} is the normal cdf.
+For a probit regression, \eqn{f_y(t) = -\log(\Phi(yt))} where \eqn{\Phi(\cdot)} is the normal cdf.
 Then,
 \deqn{
-g(t) = \frac{-y\phi(yt)}{\Phi(yt)},
+g(t) = -\frac{y\phi(yt)}{\Phi(yt)},
 }
 where \eqn{\phi} is the normal pdf, and 
 \deqn{

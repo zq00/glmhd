@@ -4,20 +4,20 @@
 \alias{estimate_variance}
 \title{Estimate std.dev. of the linear predictor evaluated at the MLE}
 \usage{
-estimate_variance(x, y, beta, family, b_var)
+estimate_variance(x, beta, family, b_var)
 }
 \arguments{
-\item{y}{A vector of responses of length n}
+\item{x}{A covariate matrix of size n*p.}
 
-\item{beta}{A vector of true model coef.}
+\item{beta}{A vector of true model coef. (used to sample \code{y})}
 
 \item{family}{A GLM family, with family and link. See also [compute_deriv()].}
 
-\item{b_var}{Numeric. Number of bootstrap replicates used to estimate \eqn{sd(X^\top \hat{\beta})}.}
+\item{b_var}{Numeric. Number of bootstrap samples}
 }
 \value{
 A vector of length \code{b_var} of \eqn{\hat{\eta}} in each bootstrap sample. 
-  if the GLM function reports an error in more than 50% of times, then return -1.
+  if the GLM function reports an error in more than 50% of times, then return -1 (which means the MLE may not exist at \eqn{\beta}).
 }
 \description{
 Estimates \eqn{\eta = sd(X_\mathrm{new}^\top \hat{\beta})} where \eqn{X_{\mathrm{new}}} is a new obs. and \eqn{\hat{\beta}} is the MLE

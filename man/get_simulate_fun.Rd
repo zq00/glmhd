@@ -11,8 +11,8 @@ get_simulate_fun(family)
 Currently supports binomial and Poisson families.}
 }
 \value{
-simulate_fun a function which takes a vector of linear predictors as inputs
-and returns a vector of simulated responses given the linear predictors.
+simulate_fun a function which takes as input a covariate matrix X and a coefficient vector beta.
+and returns a vector containing simulated responses given X andbeta.
 }
 \description{
 Simulate response given linear predictors
@@ -20,5 +20,5 @@ Simulate response given linear predictors
 \examples{
 family <-  binomial(link = "logit")
 fun <- get_simulate_fun(family)
-y <- fun(rnorm(10))
+y <- fun(X = matrix(rnorm(100, 0, 1), 10, 10), beta = rnorm(10))
 }

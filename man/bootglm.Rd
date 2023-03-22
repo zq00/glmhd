@@ -11,11 +11,12 @@ bootglm(X, beta, family, b_boot, verbose)
 
 \item{beta}{A vector of length n. Coefficients where the parametric bootstrap is applied.}
 
-\item{family}{An object of class family}
+\item{family}{An object of class family. Besides the usual definition of glm family (see [stats::family]), 
+\code{family} should include an additional element \code{simulate_fun} (see [get_simulate_fun]).}
 
-\item{b_boot}{An integer of number of bootstrap samples}
+\item{b_boot}{An integer of number of bootstrap samples.}
 
-\item{verbose}{Print progress if T}
+\item{verbose}{Print progress if \code{T}.}
 }
 \value{
 mle_boot a matrix of size p * b_boot of the bootstrap MLE

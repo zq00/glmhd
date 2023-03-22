@@ -6,6 +6,7 @@
 \usage{
 glm_boot(
   glm_fit,
+  simulate_fun = NULL,
   s_interval = 0.02,
   b_var = 5,
   b_boot = 100,
@@ -15,28 +16,31 @@ glm_boot(
 )
 }
 \arguments{
-\item{glm_fit}{A glm object returned by [stats:glm] function. It should contain the covariats x and responses y, i.e., the output of glm(.., x = T, y = T)}
+\item{glm_fit}{A glm object returned by [stats:glm] function. It should contain the covariates x and responses y, i.e., the output of glm(.., x = T, y = T).}
+
+\item{simulate_fun}{A function to simulate new responses (the inputs are an observation matrix and a vector of coefficients).}
 
 \item{s_interval}{A numeric value of increment of the sequence of shrinkage factors \eqn{s}. If \eqn{s_interval = 0.2}, then the 
 list of shrinkage factors would be \eqn{(0, 0.2, 0.4, ..., 1)}.}
 
-\item{b_var}{A numeric value of the number of parametric bootstrap samples at each s to estimate signal strength parameter \eqn{\gamma}}
+\item{b_var}{A numeric value of the number of parametric bootstrap samples at each s to estimate signal strength parameter \eqn{\gamma}.}
 
-\item{b_boot}{A numeric value of the number of bootstrap samples to estimate the bias and variance of the MLE}
+\item{b_boot}{A numeric value of the number of bootstrap samples to estimate the bias and variance of the MLE.}
 
 \item{robust_est}{If \code{TRUE}, use robust estimator of the bias and std.dev.}
 
 \item{verbose}{Print progress if \code{TRUE}.}
 
-\item{filename}{filename If a file name is provided, then save the plot of \eqn{\hat{\eta}(s)} versus shrinkage factors \eqn{s} to \code{filename}. (see also [estimate_gamma])}
+\item{filename}{filename If a file name is provided, then save the plot of \eqn{\hat{\eta}(s)} versus shrinkage factors \eqn{\gamma} to \code{filename} (see also [estimate_gamma]).}
 }
 \value{
 \describe{
-\item{beta_s}{\eqn{\beta_s = s_\star\cdot \hat{\beta}} satisfies \eqn{\var(X^\top \beta_s)\approx \gamma^2}}
-\item{gamma_hat}{The estimated signal strength parameter \eqn{\gamma}}
+\item{glm_fit}{The input GLM object.}
+\item{beta_s}{\eqn{\beta_s = s_\star\cdot \hat{\beta}} satisfies \eqn{\var(X^\top \beta_s)\approx \gamma^2}.}
+\item{gamma_hat}{The estimated signal strength parameter \eqn{\gamma}.}
 \item{alpha}{A numeric value of the estimated inflation of the MLE, i.e., \eqn{\hat{\beta}/\alpha} is approximately unbiased of the true model coef. }
-\item{sd}{A numeric value of the estimated std.dev. of the MLE}
-\item{boot_sample}{A matrix of size \code{b_boot}*{p} (p is the number of variables) of the bootstrap MLE. }
+\item{sd}{A numeric value of the estimated std.dev. of the MLE.}
+\item{boot_sample}{A matrix of size {p}*\code{b_boot} (p is the number of variables) of the bootstrap MLE. }
 }
 }
 \description{
