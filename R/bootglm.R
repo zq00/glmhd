@@ -6,9 +6,10 @@
 #' 
 #' @param X A covariate matrix of size n * p.
 #' @param beta A vector of length n. Coefficients where the parametric bootstrap is applied.
-#' @param family An object of class family 
-#' @param b_boot An integer of number of bootstrap samples
-#' @param verbose Print progress if T
+#' @param family An object of class family. Besides the usual definition of glm family (see [stats::family]), 
+#'   \code{family} should include an additional element \code{simulate_fun} (see [get_simulate_fun]).
+#' @param b_boot An integer of number of bootstrap samples.
+#' @param verbose Print progress if \code{T}.
 #' 
 #' @return  mle_boot a matrix of size p * b_boot of the bootstrap MLE
 #' Returns error if the bootstrap MLE does not exist more than 20% of times.
