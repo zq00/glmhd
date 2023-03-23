@@ -31,6 +31,17 @@
 #' }
 #' \item{gamma_hat}{A numeric value of the estimated signal strength.}
 #' }
+#' @importFrom stats loess 
+#' @importFrom stats predict 
+#' @importFrom stats sd
+#' @importFrom stats median 
+#' @importFrom stats lm 
+#' @importFrom graphics plot
+#' @importFrom graphics points
+#' @importFrom graphics abline
+#' @importFrom graphics mtext
+#' @importFrom grDevices png
+#' @importFrom grDevices dev.off
 #' @export
 estimate_gamma <- function(s_seq, eta_hat, eta_obs, sd_obs, verbose = T, filename = NA){
   # fit a smooth loess curve 
