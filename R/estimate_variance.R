@@ -4,7 +4,7 @@
 #' when the true coefficient is \eqn{\beta}
 #' 
 #' Generate \code{b_var} parametric bootstrap samples by sampling new responses \eqn{y} at the
-#' observed covariates and when the model coef. is \code{\beta}. 
+#' observed covariates and when the model coef. is \code{beta}. 
 #' Use SLOE to estimate \eqn{\eta} in each bootstrap sample. 
 #' 
 #' @param x A covariate matrix of size n*p.
