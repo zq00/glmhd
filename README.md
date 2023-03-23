@@ -2,7 +2,11 @@
 
 ## Overview
 
-This R package estimates the inflation and variance of the MLE from a high-dimensional binary regression model. (Note: This package is currently under construction to fix numerical inaccuracy when gamma or beta0 is large.)
+This R package estimates the inflation and variance of the MLE from a high-dimensional binary regression model. The package supports two methods: 
+
+- High-dimensional theory (which provides an exact asymptotic distribution assuming the covariates are multivariate Gaussian or sub-Gaussian).
+
+- Resized bootstrap methods (which approximates the MLE distribution but does not make distributional assumptions of the covariates)
 
 ## Getting started
 
