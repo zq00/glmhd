@@ -21,7 +21,7 @@ bootglm <- function(X, beta, family, b_boot, verbose){
   if(!is.numeric(b_boot)) stop("The number of bootstrap samples must be an integer!")
   if(verbose) cat("\n Total number of bootstrap samples: ", floor(b_boot), "\n")
   while(b < b_boot){
-    if(nerror / b_boot > 0.2){error("Bootstrap MLE does not exist for shrinked coefficients!")}
+    if(nerror / b_boot > 0.2){stop("Bootstrap MLE does not exist for shrinked coefficients!")}
     mle_boot_new <- boot_fun(X, beta, family, sloe = F)
     if(is.numeric(mle_boot_new) && mle_boot_new == -1) {nerror <- nerror + 1; next;}
     b <- b + 1; mle_boot[ ,b] <- mle_boot_new$coef
