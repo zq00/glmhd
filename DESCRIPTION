@@ -24,7 +24,10 @@ Imports:
     ECOSolveR (>= 0.5.3),
     pracma (>= 2.2.5),
     stats,
-    Matrix (>= 1.2-18)
+    Matrix (>= 1.2-18),
+    robustbase,
+    grDevices,
+    graphics
 Suggests: 
     knitr,
     rmarkdown,
