@@ -46,7 +46,7 @@ glm_boot <- function(glm_fit, simulate_fun = NULL, s_interval = 0.02, b_var = 5,
   for(s in s_seq){ 
     new_val <- estimate_variance(X, beta_hat * s, family, b_var)
   
-    if((is.numeric(new_val) && new_val == -1) || mean(new_val) > 1.5 * eta_obs) break; # stop criteria
+    if((is.numeric(new_val) && length(new_val) == 1 && new_val == -1) || mean(new_val) > 1.5 * eta_obs) break; # stop criteria
     i <- i+1; eta_hat[i, ] <- new_val
     if(verbose){if(i %% 2 == 0){cat(s_seq[i], "\t Estimated eta is ", mean(eta_hat[i, ]),"\n") }}
   }
