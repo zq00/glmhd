@@ -12,7 +12,8 @@ find_param(
   gamma,
   beta0 = 0,
   intercept = TRUE,
-  verbose = FALSE
+  verbose = FALSE,
+  x_init = NULL
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ regression when \eqn{Y = -1}.}
 \code{intercept = TRUE} by default.}
 
 \item{verbose}{If \code{TRUE}, print progress at each step.}
+
+\item{x_init}{Initial values for the parameters.}
 }
 \value{
 A vector solution to the system. When \code{gamma != 0} and \code{b !=0},
