@@ -21,6 +21,25 @@
 #' \item{boot_sample}{A matrix of size {p}*\code{b_boot} (p is the number of variables) of the bootstrap MLE. }
 #' }
 #' @importFrom robustbase Qn 
+#' @examples
+#' Problem size
+#' n <- 1000L
+#' p <- 300L
+#' # Generate data matrix
+#' nu <-  10
+#' chi <- rchisq(n, df = nu) / (nu - 2)
+#' X <- matrix(rnorm(n * p, 0, 1), n, p) / sqrt(chi) / sqrt(n)
+#' # Sample parameters
+#' beta <- rep(c(0, 1), p / 2) * 2
+#' # Generate response
+#' Y <- rbinom(n, 1, 1 / (1 + exp(- X %*% beta)))
+#' fit <- glm(Y ~ X + 0, family = binomial, x = TRUE, y = TRUE)
+#' adjusted_fit <- glm_boot(fit)
+#' # Estimated inflation
+#' adjusted_fit$alpha
+#' # Esimtaed std.dev.
+#' head(adjusted_fit$sd)
+#' @export
 #' @export
 glm_boot <- function(glm_fit, simulate_fun = NULL, s_interval = 0.02, b_var = 5, b_boot = 100, robust_est = FALSE, verbose = TRUE, filename = NA){
   # 1. extract data and MLE
