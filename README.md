@@ -12,7 +12,7 @@ This R package estimates the inflation and variance of the MLE from a high-dimen
 
 - You can find the package **vignette** under the Articles tab (https://zq00.github.io/glmhd/articles/my-vignette.html). 
 - You can read more about the theory of high dimensional logistic MLE, and the methods used in the package [here](https://arxiv.org/abs/2001.09351).  
-- You can read more about the resized bootstrap method [here](https://arxiv.org/abs/2208.08944)/
+- You can read more about the resized bootstrap method [here](https://arxiv.org/abs/2208.08944).
 
 ## Installation
 
